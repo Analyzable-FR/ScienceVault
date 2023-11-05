@@ -46,6 +46,7 @@ use pallet_transaction_payment::{ConstFeeMultiplier, CurrencyAdapter, Multiplier
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
+pub use pallet_reward;
 pub use pallet_vault;
 
 /// An index to a block.
@@ -267,11 +268,28 @@ impl pallet_sudo::Config for Runtime {
 	type WeightInfo = pallet_sudo::weights::SubstrateWeight<Runtime>;
 }
 
+/// Implementation of the RewardHandler trait to give reward at each new vault submission
+pub struct RewardHandler<T>(frame_support::pallet_prelude::PhantomData<T>);
+impl<T> pallet_reward::Reward<T::AccountId> for RewardHandler<T>
+where
+	T: pallet_reward::Config,
+{
+	fn add_contribution(account: &<T as frame_system::Config>::AccountId) {
+		pallet_reward::Pallet::<T>::add_contribution(account);
+	}
+}
+
 impl pallet_vault::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = pallet_vault::weights::SubstrateWeight<Runtime>;
 	type ElementId = u64;
 	type ElementHash = sp_core::H256;
+	type RewardHandler = RewardHandler<Runtime>;
+}
+
+impl pallet_reward::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = pallet_reward::weights::SubstrateWeight<Runtime>;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -285,6 +303,7 @@ construct_runtime!(
 		TransactionPayment: pallet_transaction_payment,
 		Sudo: pallet_sudo,
 		Vault: pallet_vault,
+		Reward: pallet_reward,
 	}
 );
 
@@ -333,6 +352,7 @@ mod benches {
 		[pallet_timestamp, Timestamp]
 		[pallet_sudo, Sudo]
 		[pallet_vault, Vault]
+		[pallet_reward, Reward]
 	);
 }
 

@@ -1,6 +1,7 @@
-use crate as pallet_vault;
+use crate as pallet_reward;
 use frame_support::traits::{ConstU16, ConstU64};
 use pallet_timestamp::{self as timestamp};
+use pallet_vault;
 use sp_core::H256;
 use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup},
@@ -16,8 +17,16 @@ frame_support::construct_runtime!(
 		System: frame_system,
 		Timestamp: timestamp,
 		VaultModule: pallet_vault,
+		RewardModule: pallet_reward,
 	}
 );
+
+impl timestamp::Config for Test {
+	type Moment = u64;
+	type OnTimestampSet = ();
+	type MinimumPeriod = ConstU64<0>;
+	type WeightInfo = ();
+}
 
 impl frame_system::Config for Test {
 	type BaseCallFilter = frame_support::traits::Everything;
@@ -45,19 +54,17 @@ impl frame_system::Config for Test {
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
-impl timestamp::Config for Test {
-	type Moment = u64;
-	type OnTimestampSet = ();
-	type MinimumPeriod = ConstU64<0>;
-	type WeightInfo = ();
-}
-
 impl pallet_vault::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = ();
 	type ElementId = u64;
 	type ElementHash = u8;
 	type RewardHandler = ();
+}
+
+impl pallet_reward::Config for Test {
+	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = ();
 }
 
 // Build genesis storage according to the mock runtime.

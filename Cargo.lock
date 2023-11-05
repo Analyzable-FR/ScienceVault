@@ -4683,6 +4683,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-reward"
+version = "4.0.0-dev"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "pallet-timestamp",
+ "pallet-vault",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+]
+
+[[package]]
 name = "pallet-session"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v1.0.0#948fbd2fd1233dc26dbb9f9bbc1d2cca2c03945d"
@@ -4787,6 +4804,7 @@ dependencies = [
  "frame-benchmarking",
  "frame-support",
  "frame-system",
+ "pallet-reward",
  "pallet-timestamp",
  "parity-scale-codec",
  "scale-info",
@@ -7036,6 +7054,7 @@ dependencies = [
  "pallet-aura",
  "pallet-balances",
  "pallet-grandpa",
+ "pallet-reward",
  "pallet-sudo",
  "pallet-timestamp",
  "pallet-transaction-payment",

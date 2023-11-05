@@ -1,6 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use pallet::*;
+use pallet_reward::Reward;
 use pallet_timestamp::{self as timestamp};
 
 use codec::{Codec, Decode, Encode, MaxEncodedLen};
@@ -39,14 +40,13 @@ pub mod pallet {
 	#[pallet::pallet]
 	pub struct Pallet<T>(_);
 
-	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]
 	pub trait Config: frame_system::Config + timestamp::Config {
-		/// Because this pallet emits events, it depends on the runtime's definition of an event.
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 		/// Type representing the weight of this pallet
 		type WeightInfo: WeightInfo;
 
+		/// Type representing the element index
 		type ElementId: Parameter
 			+ Member
 			+ AtLeast32BitUnsigned
@@ -56,7 +56,11 @@ pub mod pallet {
 			+ Debug
 			+ MaxEncodedLen;
 
+		/// Type representing the element hash
 		type ElementHash: Parameter + Member + Default + Copy + MaxEncodedLen;
+
+		/// Type representing the reward handler
+		type RewardHandler: Reward<Self::AccountId>;
 	}
 
 	// Map vault element id to element hash.
@@ -106,6 +110,7 @@ pub mod pallet {
 					Data { element_id, timestamp, sources: Default::default(), owner: who.clone() },
 				);
 				NextVaultElementId::<T>::put(element_id + T::ElementId::one());
+				T::RewardHandler::add_contribution(&who);
 				Self::deposit_event(Event::AddedToVault { element_id, who });
 				Ok(())
 			} else {
