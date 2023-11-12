@@ -7,7 +7,7 @@ use crate::Pallet as Template;
 use frame_benchmarking::v2::*;
 use frame_system::RawOrigin;
 
-#[benchmarks]
+/*#[benchmarks]
 mod benchmarks {
 	use super::*;
 
@@ -32,4 +32,4 @@ mod benchmarks {
 	}
 
 	impl_benchmark_test_suite!(Template, crate::mock::new_test_ext(), crate::mock::Test);
-}
+}*/

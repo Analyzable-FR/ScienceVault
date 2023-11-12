@@ -61,7 +61,6 @@ pub mod pallet {
 
 		/// Type representing the reward handler
 		type RewardHandler: Reward<Self::AccountId>;
-		///
 		/// Type representing the convertion between an elementHash and an accountId
 		type AccountIdOf: Convert<Self::ElementHash, Option<Self::AccountId>>;
 	}
@@ -121,7 +120,7 @@ pub mod pallet {
 			}
 		}
 		#[pallet::call_index(1)]
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::add_element())]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::set_element_source())]
 		pub fn set_element_source(
 			origin: OriginFor<T>,
 			element: T::ElementHash,
@@ -149,7 +148,7 @@ pub mod pallet {
 			})
 		}
 		#[pallet::call_index(2)]
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::add_element())]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::delete_element())]
 		pub fn delete_element(origin: OriginFor<T>, element: T::ElementHash) -> DispatchResult {
 			let _ = ensure_root(origin)?;
 			if let Some(data) = Vault::<T>::take(element) {
