@@ -60,6 +60,7 @@ impl pallet_vault::Config for Test {
 	type ElementId = u64;
 	type ElementHash = u8;
 	type RewardHandler = ();
+	type AccountIdOf = ();
 }
 
 impl pallet_reward::Config for Test {

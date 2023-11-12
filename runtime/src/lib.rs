@@ -279,12 +279,22 @@ where
 	}
 }
 
+pub struct AccountIdOf<T>(frame_support::pallet_prelude::PhantomData<T>);
+impl<T> sp_runtime::traits::Convert<T::ElementHash, Option<T::AccountId>> for AccountIdOf<T>
+where
+	T: pallet_vault::Config,
+{
+	fn convert(element: T::ElementHash) -> Option<T::AccountId> {
+		pallet_vault::Pallet::<T>::account_id_of(element)
+	}
+}
 impl pallet_vault::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = pallet_vault::weights::SubstrateWeight<Runtime>;
 	type ElementId = u64;
 	type ElementHash = sp_core::H256;
 	type RewardHandler = RewardHandler<Runtime>;
+	type AccountIdOf = AccountIdOf<Runtime>;
 }
 
 impl pallet_reward::Config for Runtime {

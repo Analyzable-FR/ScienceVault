@@ -9,7 +9,7 @@ use core::fmt::Debug;
 use frame_support::{pallet_prelude::TypeInfo, BoundedVec};
 #[cfg(feature = "std")]
 use sp_runtime::serde::{Deserialize, Serialize};
-use sp_runtime::traits::{AtLeast32BitUnsigned, ConstU32, One};
+use sp_runtime::traits::{AtLeast32BitUnsigned, ConstU32, Convert, One};
 
 #[cfg(test)]
 mod mock;
@@ -61,6 +61,9 @@ pub mod pallet {
 
 		/// Type representing the reward handler
 		type RewardHandler: Reward<Self::AccountId>;
+		///
+		/// Type representing the convertion between an elementHash and an accountId
+		type AccountIdOf: Convert<Self::ElementHash, Option<Self::AccountId>>;
 	}
 
 	// Map vault element id to element hash.
@@ -155,6 +158,14 @@ pub mod pallet {
 			} else {
 				return Err(Error::<T>::NotFound.into());
 			}
+		}
+	}
+	impl<T: Config> Pallet<T> {
+		pub fn account_id_of(element: T::ElementHash) -> Option<T::AccountId> {
+			if let Some(data) = Vault::<T>::get(element) {
+				return Some(data.owner);
+			}
+			None
 		}
 	}
 }
