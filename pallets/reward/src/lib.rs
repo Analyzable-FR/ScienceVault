@@ -113,13 +113,16 @@ pub mod pallet {
 			Reputations::<T>::try_mutate_exists(account.clone(), |reputation| {
 				if let Some(rewarder_reputation) = Reputations::<T>::get(&who) {
 					if let Some(ref mut reputation) = reputation {
-						reputation.score += rewarder_reputation.reputation * amount;
+						reputation.score = reputation
+							.score
+							.saturating_add(rewarder_reputation.reputation * amount);
 						let raw_reputation = reputation.score * reputation.contribution;
 						MaxRawReputation::<T>::put(core::cmp::max(
 							raw_reputation,
 							MaxRawReputation::<T>::get(),
 						));
-						reputation.reputation = raw_reputation / (MaxRawReputation::<T>::get() + 1);
+						reputation.reputation =
+							(raw_reputation * 100) / (MaxRawReputation::<T>::get() + 1);
 						Self::deposit_event(Event::AccountRewarded { account, who, amount });
 						Ok(())
 					} else {
@@ -131,7 +134,7 @@ pub mod pallet {
 			})
 		}
 		#[pallet::call_index(1)]
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::reward())]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::punish())]
 		pub fn punish(origin: OriginFor<T>, account: T::AccountId, amount: u128) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			if who == account {
@@ -140,13 +143,16 @@ pub mod pallet {
 			Reputations::<T>::try_mutate_exists(account.clone(), |reputation| {
 				if let Some(rewarder_reputation) = Reputations::<T>::get(&who) {
 					if let Some(ref mut reputation) = reputation {
-						reputation.score -= rewarder_reputation.reputation * amount;
+						reputation.score = reputation
+							.score
+							.saturating_sub(rewarder_reputation.reputation * amount);
 						let raw_reputation = reputation.score * reputation.contribution;
 						MaxRawReputation::<T>::put(core::cmp::max(
 							raw_reputation,
 							MaxRawReputation::<T>::get(),
 						));
-						reputation.reputation = raw_reputation / (MaxRawReputation::<T>::get() + 1);
+						reputation.reputation =
+							(raw_reputation * 100) / (MaxRawReputation::<T>::get() + 1);
 						Self::deposit_event(Event::AccountPunished { account, who, amount });
 						Ok(())
 					} else {
@@ -157,6 +163,26 @@ pub mod pallet {
 				}
 			})
 		}
+		#[pallet::call_index(2)]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::slash())]
+		pub fn slash(origin: OriginFor<T>, account: T::AccountId, amount: u128) -> DispatchResult {
+			let _ = ensure_root(origin)?;
+			Reputations::<T>::try_mutate_exists(account.clone(), |reputation| {
+				if let Some(ref mut reputation) = reputation {
+					reputation.score = reputation.score.saturating_sub(100 * amount);
+					let raw_reputation = reputation.score * reputation.contribution;
+					MaxRawReputation::<T>::put(core::cmp::max(
+						raw_reputation,
+						MaxRawReputation::<T>::get(),
+					));
+					reputation.reputation =
+						(raw_reputation * 100) / (MaxRawReputation::<T>::get() + 1);
+					Ok(())
+				} else {
+					return Err(Error::<T>::AccountNotFound.into());
+				}
+			})
+		}
 	}
 	impl<T: Config> Pallet<T> {
 		pub fn add_contribution(account: &T::AccountId) {
@@ -164,7 +190,7 @@ pub mod pallet {
 				if let Some(ref mut reputation) = reputation {
 					reputation.contribution += 1;
 				} else {
-					*reputation = Some(Reputation { contribution: 1, score: 0, reputation: 0 });
+					*reputation = Some(Reputation { contribution: 1, score: 1, reputation: 50 });
 				}
 			});
 		}

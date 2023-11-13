@@ -103,3 +103,34 @@ fn noop_punish_itself() {
 		);
 	});
 }
+
+#[test]
+fn slash() {
+	new_test_ext().execute_with(|| {
+		// Go past genesis block so events get deposited
+		System::set_block_number(1);
+		RewardModule::add_contribution(&1);
+		assert_ok!(RewardModule::slash(RuntimeOrigin::root(), 1, 10));
+	});
+}
+
+#[test]
+fn slash_punish_() {
+	new_test_ext().execute_with(|| {
+		// Go past genesis block so events get deposited
+		System::set_block_number(1);
+		assert_noop!(
+			RewardModule::slash(RuntimeOrigin::root(), 1, 10),
+			Error::<Test>::AccountNotFound
+		);
+	});
+}
+
+#[test]
+fn noop_slash_() {
+	new_test_ext().execute_with(|| {
+		// Go past genesis block so events get deposited
+		System::set_block_number(1);
+		assert_noop!(RewardModule::slash(RuntimeOrigin::signed(0), 1, 10), BadOrigin);
+	});
+}

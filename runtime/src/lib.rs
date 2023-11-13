@@ -301,7 +301,7 @@ impl pallet_vault::Config for Runtime {
 
 impl pallet_reward::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type WeightInfo = pallet_reward::weights::SubstrateWeight<Runtime>;
+	type WeightInfo = weights::pallet_reward::WeightInfo<Runtime>;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -358,13 +358,12 @@ extern crate frame_benchmarking;
 #[cfg(feature = "runtime-benchmarks")]
 mod benches {
 	define_benchmarks!(
-		//[frame_benchmarking, BaselineBench::<Runtime>]
 		[frame_system, SystemBench::<Runtime>]
 		[pallet_balances, Balances]
 		[pallet_timestamp, Timestamp]
 		[pallet_sudo, Sudo]
 		[pallet_vault, Vault]
-		//[pallet_reward, Reward]
+		[pallet_reward, Reward]
 	);
 }
 
