@@ -22,13 +22,16 @@ mod benchmarking;
 pub mod weights;
 pub use weights::*;
 
+pub const MAX_SOURCES: u32 = 100;
+pub const MAX_SOURCE_LEN: u32 = 100;
+
 #[cfg_attr(feature = "std", derive(Debug, Deserialize, Serialize))]
 #[derive(Encode, Decode, Clone, PartialEq, Eq, TypeInfo, MaxEncodedLen)]
 pub struct Data<ElementId, AccountId, Moment> {
 	element_id: ElementId,
 	owner: AccountId,
 	timestamp: Moment,
-	sources: BoundedVec<BoundedVec<u8, ConstU32<100>>, ConstU32<100>>,
+	sources: BoundedVec<BoundedVec<u8, ConstU32<MAX_SOURCE_LEN>>, ConstU32<MAX_SOURCES>>,
 }
 
 #[frame_support::pallet]
@@ -85,7 +88,7 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		AddedToVault { element_id: T::ElementId, who: T::AccountId },
 		DeletedFromVault { element_id: T::ElementId },
-		SourceAdded { element_id: T::ElementId, source: BoundedVec<u8, ConstU32<100>> },
+		SourceAdded { element_id: T::ElementId, source: BoundedVec<u8, ConstU32<MAX_SOURCE_LEN>> },
 	}
 
 	#[pallet::error]
@@ -124,7 +127,7 @@ pub mod pallet {
 		pub fn set_element_source(
 			origin: OriginFor<T>,
 			element: T::ElementHash,
-			source: BoundedVec<u8, ConstU32<100>>,
+			source: BoundedVec<u8, ConstU32<MAX_SOURCE_LEN>>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			Vault::<T>::try_mutate_exists(element, |data| {

@@ -28,14 +28,25 @@ mod benchmarks {
 		let element_hash = T::ElementHash::default();
 		let _ = Pallet::<T>::add_element(RawOrigin::Signed(caller.clone()).into(), element_hash);
 		assert!(Vault::<T>::get(element_hash).is_some());
-		let element_source: BoundedVec<u8, ConstU32<100>> = vec![0u8; 100].try_into().unwrap();
+		let element_source: BoundedVec<u8, ConstU32<MAX_SOURCE_LEN>> =
+			vec![0u8; MAX_SOURCE_LEN as usize].try_into().unwrap();
+
+		Vault::<T>::mutate(element_hash, |data| {
+			if let Some(ref mut data) = data {
+				for _i in 0..MAX_SOURCE_LEN - 1 {
+					let _ = data.sources.try_push(element_source.clone());
+				}
+			}
+		});
+		assert_eq!(Vault::<T>::get(element_hash).unwrap().sources.len() as u32, MAX_SOURCES - 1);
 
 		#[extrinsic_call]
 		set_element_source(RawOrigin::Signed(caller), element_hash, element_source.clone());
 
-		let sources: BoundedVec<BoundedVec<u8, ConstU32<100>>, ConstU32<100>> =
-			vec![element_source].try_into().unwrap();
+		let sources: BoundedVec<BoundedVec<u8, ConstU32<MAX_SOURCE_LEN>>, ConstU32<MAX_SOURCES>> =
+			vec![element_source; MAX_SOURCES as usize].try_into().unwrap();
 		assert_eq!(Vault::<T>::get(element_hash).unwrap().sources, sources);
+		assert_eq!(Vault::<T>::get(element_hash).unwrap().sources.len() as u32, MAX_SOURCES);
 	}
 
 	#[benchmark]
