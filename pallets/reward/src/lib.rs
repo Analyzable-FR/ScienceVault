@@ -7,7 +7,10 @@ use core::fmt::Debug;
 use frame_support::{pallet_prelude::TypeInfo, traits::BuildGenesisConfig};
 #[cfg(feature = "std")]
 use sp_runtime::serde::{Deserialize, Serialize};
-
+use sp_runtime::{
+	traits::{BlockNumberProvider, One, Zero},
+	Perbill, Saturating,
+};
 #[cfg(test)]
 mod mock;
 
@@ -21,15 +24,20 @@ pub use weights::*;
 
 #[cfg_attr(feature = "std", derive(Debug, Deserialize, Serialize))]
 #[derive(Encode, Decode, Clone, PartialEq, Eq, TypeInfo, MaxEncodedLen)]
-pub struct Reputation {
+pub struct Reputation<BlockNumber> {
 	contribution: u128, // number of elements added in the vault
-	score: u128,        /* score computed at each reward as score +=
-	                     * rewarded_amount*rewarder_reputation */
-	reputation: u128, // reputation computed as (contribution*score*100)/best_reputation
+	score: u128,        // score computed at each reward
+	reputation: Perbill,
+	last_evaluation: BlockNumber,
 }
-impl Default for Reputation {
+impl<BlockNumberFor: Zero> Default for Reputation<BlockNumberFor> {
 	fn default() -> Self {
-		Reputation { contribution: 0, score: 0, reputation: 50 }
+		Reputation {
+			contribution: 0,
+			score: 0,
+			reputation: Perbill::zero(),
+			last_evaluation: BlockNumberFor::zero(),
+		}
 	}
 }
 
@@ -81,11 +89,19 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn reputation)]
 	pub type Reputations<T: Config> =
-		StorageMap<_, Blake2_128Concat, T::AccountId, Reputation, OptionQuery>;
+		StorageMap<_, Blake2_128Concat, T::AccountId, Reputation<BlockNumberFor<T>>, OptionQuery>;
 
 	#[pallet::storage]
 	pub(super) type MaxRawReputation<T: Config> =
 		StorageValue<Value = u128, QueryKind = ValueQuery>;
+
+	#[pallet::storage]
+	pub(super) type AccountQueue<T: Config> =
+		StorageValue<Value = BoundedVec<T::AccountId, ConstU32<1000>>, QueryKind = ValueQuery>;
+
+	#[pallet::storage]
+	pub(super) type EvaluationQueue<T: Config> =
+		StorageValue<Value = BoundedVec<T::AccountId, ConstU32<1000>>, QueryKind = ValueQuery>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -113,16 +129,17 @@ pub mod pallet {
 			Reputations::<T>::try_mutate_exists(account.clone(), |reputation| {
 				if let Some(rewarder_reputation) = Reputations::<T>::get(&who) {
 					if let Some(ref mut reputation) = reputation {
-						reputation.score = reputation
-							.score
-							.saturating_add(rewarder_reputation.reputation * amount);
+						let rewarder_reputation = Self::compute_reputation(rewarder_reputation);
+						reputation.score =
+							reputation.score.saturating_add(rewarder_reputation * amount);
 						let raw_reputation = reputation.score * reputation.contribution;
 						MaxRawReputation::<T>::put(core::cmp::max(
 							raw_reputation,
 							MaxRawReputation::<T>::get(),
 						));
-						reputation.reputation =
-							(raw_reputation * 100) / (MaxRawReputation::<T>::get() + 1);
+						reputation.reputation = Self::compute_reputation(reputation.clone());
+						reputation.last_evaluation =
+							frame_system::Pallet::<T>::current_block_number();
 						Self::deposit_event(Event::AccountRewarded { account, who, amount });
 						Ok(())
 					} else {
@@ -143,16 +160,17 @@ pub mod pallet {
 			Reputations::<T>::try_mutate_exists(account.clone(), |reputation| {
 				if let Some(rewarder_reputation) = Reputations::<T>::get(&who) {
 					if let Some(ref mut reputation) = reputation {
-						reputation.score = reputation
-							.score
-							.saturating_sub(rewarder_reputation.reputation * amount);
+						let rewarder_reputation = Self::compute_reputation(rewarder_reputation);
+						reputation.score =
+							reputation.score.saturating_sub(rewarder_reputation * amount);
 						let raw_reputation = reputation.score * reputation.contribution;
 						MaxRawReputation::<T>::put(core::cmp::max(
 							raw_reputation,
 							MaxRawReputation::<T>::get(),
 						));
-						reputation.reputation =
-							(raw_reputation * 100) / (MaxRawReputation::<T>::get() + 1);
+						reputation.reputation = Self::compute_reputation(reputation.clone());
+						reputation.last_evaluation =
+							frame_system::Pallet::<T>::current_block_number();
 						Self::deposit_event(Event::AccountPunished { account, who, amount });
 						Ok(())
 					} else {
@@ -175,13 +193,33 @@ pub mod pallet {
 						raw_reputation,
 						MaxRawReputation::<T>::get(),
 					));
-					reputation.reputation =
-						(raw_reputation * 100) / (MaxRawReputation::<T>::get() + 1);
+					reputation.reputation = Self::compute_reputation(reputation.clone());
+					reputation.last_evaluation = frame_system::Pallet::<T>::current_block_number();
 					Ok(())
 				} else {
 					return Err(Error::<T>::AccountNotFound.into());
 				}
 			})
+		}
+		#[pallet::call_index(3)]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::slash())]
+		pub fn evaluate_reputation(origin: OriginFor<T>, account: T::AccountId) -> DispatchResult {
+			let _who = ensure_signed(origin)?;
+			Self::do_evaluate_reputation(account)
+		}
+	}
+	#[pallet::hooks]
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T>
+	where
+		BlockNumberFor<T>: From<u32>,
+	{
+		fn on_idle(block: BlockNumberFor<T>, remaining_weight: Weight) -> Weight {
+			if block % BlockNumberFor::<T>::one().saturating_mul(10.into()) ==
+				BlockNumberFor::<T>::zero()
+			{
+				return Self::process_evaluation_queue(remaining_weight);
+			}
+			remaining_weight
 		}
 	}
 	impl<T: Config> Pallet<T> {
@@ -190,9 +228,58 @@ pub mod pallet {
 				if let Some(ref mut reputation) = reputation {
 					reputation.contribution += 1;
 				} else {
-					*reputation = Some(Reputation { contribution: 1, score: 1, reputation: 50 });
+					*reputation = Some(Reputation {
+						contribution: 1,
+						score: 1,
+						reputation: Perbill::zero(),
+						last_evaluation: BlockNumberFor::<T>::zero(),
+					});
+					AccountQueue::<T>::mutate(|queue| {
+						let _ = queue.try_push(account.clone());
+					});
 				}
 			});
+		}
+		fn compute_reputation(reputation: Reputation<BlockNumberFor<T>>) -> Perbill {
+			let raw_reputation = reputation.score * reputation.contribution;
+			Perbill::from_rational(raw_reputation * 100, MaxRawReputation::<T>::get() + 1)
+		}
+		fn do_evaluate_reputation(account: T::AccountId) -> DispatchResult {
+			Reputations::<T>::try_mutate_exists(account.clone(), |reputation| {
+				if let Some(ref mut reputation) = reputation {
+					let raw_reputation = reputation.score * reputation.contribution;
+					MaxRawReputation::<T>::put(core::cmp::max(
+						raw_reputation,
+						MaxRawReputation::<T>::get(),
+					));
+					reputation.reputation = Self::compute_reputation(reputation.clone());
+					reputation.last_evaluation = frame_system::Pallet::<T>::current_block_number();
+					Ok(())
+				} else {
+					return Err(Error::<T>::AccountNotFound.into());
+				}
+			})
+		}
+		pub fn process_evaluation_queue(remaining_weight: Weight) -> Weight {
+			EvaluationQueue::<T>::put(AccountQueue::<T>::get());
+			EvaluationQueue::<T>::mutate(|ref mut queue| -> Weight {
+				let mut total_weight = T::WeightInfo::do_process_evaluation_queue();
+				let overhead = T::WeightInfo::process_evaluation_queue(2)
+					.saturating_sub(T::WeightInfo::process_evaluation_queue(1));
+
+				if queue.is_empty() {
+					return total_weight;
+				}
+				while total_weight.any_lt(remaining_weight.saturating_sub(overhead)) {
+					if let Some(account) = queue.pop() {
+						let _ = Self::do_evaluate_reputation(account);
+						total_weight += overhead;
+					} else {
+						break;
+					}
+				}
+				total_weight
+			})
 		}
 	}
 }
