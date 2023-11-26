@@ -49,6 +49,8 @@ impl<AccountId> Reward<AccountId> for () {
 	fn add_contribution(_account: &AccountId) {}
 }
 
+pub const MAX_USERS: u32 = 100_000;
+
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
@@ -97,11 +99,11 @@ pub mod pallet {
 
 	#[pallet::storage]
 	pub(super) type AccountQueue<T: Config> =
-		StorageValue<Value = BoundedVec<T::AccountId, ConstU32<1000>>, QueryKind = ValueQuery>;
+		StorageValue<Value = BoundedVec<T::AccountId, ConstU32<MAX_USERS>>, QueryKind = ValueQuery>;
 
 	#[pallet::storage]
 	pub(super) type EvaluationQueue<T: Config> =
-		StorageValue<Value = BoundedVec<T::AccountId, ConstU32<1000>>, QueryKind = ValueQuery>;
+		StorageValue<Value = BoundedVec<T::AccountId, ConstU32<MAX_USERS>>, QueryKind = ValueQuery>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -219,7 +221,7 @@ pub mod pallet {
 			{
 				return Self::process_evaluation_queue(remaining_weight);
 			}
-			remaining_weight
+			remaining_weight.saturating_add(T::WeightInfo::on_idle_noop())
 		}
 	}
 	impl<T: Config> Pallet<T> {

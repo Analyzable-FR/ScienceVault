@@ -38,6 +38,7 @@ pub trait WeightInfo {
 	fn slash() -> Weight;
 	fn do_process_evaluation_queue() -> Weight;
 	fn process_evaluation_queue(_i: u32) -> Weight;
+	fn on_idle_noop() -> Weight;
 }
 
 /// Weights for pallet_template using the Substrate node and recommended hardware.
@@ -85,6 +86,14 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 		Weight::from_parts(1, 1)
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
+	fn on_idle_noop() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `0`
+		//  Estimated: `0`
+		// Minimum execution time: 8_000_000 picoseconds.
+		Weight::from_parts(1, 1)
+			.saturating_add(RocksDbWeight::get().writes(1_u64))
+	}
 }
 
 // For backwards compatibility and tests
@@ -122,6 +131,14 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().writes(1_u64))
 	}
 	fn process_evaluation_queue(_i: u32) -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `0`
+		//  Estimated: `0`
+		// Minimum execution time: 8_000_000 picoseconds.
+		Weight::from_parts(1, 1)
+			.saturating_add(RocksDbWeight::get().writes(1_u64))
+	}
+	fn on_idle_noop() -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `0`
 		//  Estimated: `0`

@@ -6,7 +6,8 @@ use crate::benchmarking::frame_support::pallet_prelude::Weight;
 #[allow(unused)]
 use crate::Pallet as Template;
 use frame_benchmarking::v2::*;
-use frame_system::RawOrigin;
+use frame_support::traits::OnIdle;
+use frame_system::{pallet_prelude::BlockNumberFor, RawOrigin};
 
 #[benchmarks]
 mod benchmarks {
@@ -62,7 +63,7 @@ mod benchmarks {
 	}
 
 	#[benchmark]
-	fn process_evaluation_queue(i: Linear<1, { 1000 }>) {
+	fn process_evaluation_queue(i: Linear<1, { 1024 }>) {
 		for j in 0..i {
 			let account: T::AccountId = account("sub", j, j);
 			EvaluationQueue::<T>::mutate(|queue| {
@@ -74,6 +75,18 @@ mod benchmarks {
 		#[block]
 		{
 			Pallet::<T>::process_evaluation_queue(Weight::MAX);
+		}
+
+		assert_eq!(EvaluationQueue::<T>::get().len(), 0);
+	}
+
+	#[benchmark]
+	fn on_idle_noop() {
+		assert_eq!(EvaluationQueue::<T>::get().len(), 0);
+
+		#[block]
+		{
+			Pallet::<T>::on_idle(BlockNumberFor::<T>::zero(), Weight::MAX);
 		}
 
 		assert_eq!(EvaluationQueue::<T>::get().len(), 0);
