@@ -95,7 +95,7 @@ pub mod pallet {
 
 	#[pallet::storage]
 	pub(super) type MaxRawReputation<T: Config> =
-		StorageValue<Value = u128, QueryKind = ValueQuery>;
+		StorageValue<Value = u128, QueryKind = ValueQuery>; //TODO reeavaluate
 
 	#[pallet::storage]
 	pub(super) type AccountQueue<T: Config> =
@@ -165,11 +165,6 @@ pub mod pallet {
 						let rewarder_reputation = Self::compute_reputation(rewarder_reputation);
 						reputation.score =
 							reputation.score.saturating_sub(rewarder_reputation * amount);
-						let raw_reputation = reputation.score * reputation.contribution;
-						MaxRawReputation::<T>::put(core::cmp::max(
-							raw_reputation,
-							MaxRawReputation::<T>::get(),
-						));
 						reputation.reputation = Self::compute_reputation(reputation.clone());
 						reputation.last_evaluation =
 							frame_system::Pallet::<T>::current_block_number();
@@ -264,6 +259,7 @@ pub mod pallet {
 		}
 		pub fn process_evaluation_queue(remaining_weight: Weight) -> Weight {
 			EvaluationQueue::<T>::put(AccountQueue::<T>::get());
+			MaxRawReputation::<T>::put(0);
 			EvaluationQueue::<T>::mutate(|ref mut queue| -> Weight {
 				let mut total_weight = T::WeightInfo::do_process_evaluation_queue();
 				let overhead = T::WeightInfo::process_evaluation_queue(2)
