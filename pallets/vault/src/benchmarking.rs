@@ -15,11 +15,16 @@ mod benchmarks {
 	fn add_element() {
 		let caller: T::AccountId = whitelisted_caller();
 		let element_hash = T::ElementHash::default();
+		let elements: BoundedVec<T::ElementHash, ConstU32<MAX_ELEMENTS>> =
+			vec![T::ElementHash::default(); MAX_ELEMENTS as usize - 1].try_into().unwrap();
+		AccountElements::<T>::insert(&caller, elements);
+		assert!(AccountElements::<T>::get(&caller).unwrap().len() as u32 == MAX_ELEMENTS - 1);
 
 		#[extrinsic_call]
-		add_element(RawOrigin::Signed(caller), element_hash);
+		add_element(RawOrigin::Signed(caller.clone()), element_hash);
 
 		assert!(Vault::<T>::get(element_hash).is_some());
+		assert!(AccountElements::<T>::get(caller).unwrap().len() as u32 == MAX_ELEMENTS);
 	}
 
 	#[benchmark]

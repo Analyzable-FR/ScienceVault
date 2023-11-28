@@ -10,6 +10,8 @@ fn insert_value() {
 		assert_ok!(VaultModule::add_element(RuntimeOrigin::signed(1), 42));
 		assert_eq!(VaultModule::vault_element(42).unwrap().element_id, 0);
 		assert_eq!(VaultModule::vault_element(42).unwrap().owner, 1);
+		let elements: BoundedVec<u8, ConstU32<100_000>> = bounded_vec![42];
+		assert_eq!(VaultModule::account_elements(1).unwrap(), elements);
 		System::assert_last_event(Event::AddedToVault { element_id: 0, who: 1 }.into());
 
 		assert_ok!(VaultModule::add_element(RuntimeOrigin::signed(1), 44));
@@ -27,12 +29,15 @@ fn noop_insert_value() {
 		assert_ok!(VaultModule::add_element(RuntimeOrigin::signed(1), 42));
 		assert_eq!(VaultModule::vault_element(42).unwrap().element_id, 0);
 		assert_eq!(VaultModule::vault_element(42).unwrap().owner, 1);
+		let elements: BoundedVec<u8, ConstU32<100_000>> = bounded_vec![42];
+		assert_eq!(VaultModule::account_elements(1).unwrap(), elements);
 		System::assert_last_event(Event::AddedToVault { element_id: 0, who: 1 }.into());
 
 		assert_noop!(
 			VaultModule::add_element(RuntimeOrigin::signed(1), 42),
 			Error::<Test>::AlreadyInVault
 		);
+		assert_eq!(VaultModule::account_elements(1).unwrap(), elements);
 	});
 }
 

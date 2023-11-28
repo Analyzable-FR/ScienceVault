@@ -24,6 +24,7 @@ pub use weights::*;
 
 pub const MAX_SOURCES: u32 = 100;
 pub const MAX_SOURCE_LEN: u32 = 100;
+pub const MAX_ELEMENTS: u32 = 100_000;
 
 #[cfg_attr(feature = "std", derive(Debug, Deserialize, Serialize))]
 #[derive(Encode, Decode, Clone, PartialEq, Eq, TypeInfo, MaxEncodedLen)]
@@ -78,6 +79,17 @@ pub mod pallet {
 		Data<T::ElementId, T::AccountId, T::Moment>,
 		OptionQuery,
 	>;
+	//
+	// Map account id to element hash.
+	#[pallet::storage]
+	#[pallet::getter(fn account_elements)]
+	pub type AccountElements<T: Config> = StorageMap<
+		_,
+		Blake2_128Concat,
+		T::AccountId,
+		BoundedVec<T::ElementHash, ConstU32<MAX_ELEMENTS>>,
+		OptionQuery,
+	>;
 
 	#[pallet::storage]
 	pub(super) type NextVaultElementId<T: Config> =
@@ -99,6 +111,7 @@ pub mod pallet {
 		NotOwned,
 		NotFound,
 		SourcesFull,
+		AccountFull,
 	}
 
 	#[pallet::call]
@@ -110,10 +123,18 @@ pub mod pallet {
 			if !Vault::<T>::contains_key(element) {
 				let element_id = NextVaultElementId::<T>::get();
 				let timestamp = timestamp::Pallet::<T>::get();
-				<Vault<T>>::insert(
+				Vault::<T>::insert(
 					element,
 					Data { element_id, timestamp, sources: Default::default(), owner: who.clone() },
 				);
+				if !AccountElements::<T>::contains_key(&who) {
+					AccountElements::<T>::insert(&who, BoundedVec::default());
+				}
+				AccountElements::<T>::mutate(&who, |data| {
+					if let Some(ref mut data) = data {
+						let _ = data.try_push(element).map_err(|_| Error::<T>::AccountFull);
+					}
+				});
 				NextVaultElementId::<T>::put(element_id + T::ElementId::one());
 				T::RewardHandler::add_contribution(&who);
 				Self::deposit_event(Event::AddedToVault { element_id, who });
