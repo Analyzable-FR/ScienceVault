@@ -14,6 +14,10 @@ mod benchmarks {
 	#[benchmark]
 	fn add_element() {
 		let caller: T::AccountId = whitelisted_caller();
+		let _ = T::Currency::make_free_balance_be(
+			&caller,
+			T::Currency::minimum_balance() * 10u32.into(),
+		);
 		let element_hash = T::ElementHash::default();
 		let elements: BoundedVec<T::ElementHash, ConstU32<MAX_ELEMENTS>> =
 			vec![T::ElementHash::default(); MAX_ELEMENTS as usize - 1].try_into().unwrap();
@@ -30,6 +34,10 @@ mod benchmarks {
 	#[benchmark]
 	fn set_element_source() {
 		let caller: T::AccountId = whitelisted_caller();
+		let _ = T::Currency::make_free_balance_be(
+			&caller,
+			T::Currency::minimum_balance() * 10u32.into(),
+		);
 		let element_hash = T::ElementHash::default();
 		let _ = Pallet::<T>::add_element(RawOrigin::Signed(caller.clone()).into(), element_hash);
 		assert!(Vault::<T>::get(element_hash).is_some());
@@ -57,6 +65,10 @@ mod benchmarks {
 	#[benchmark]
 	fn delete_element() {
 		let caller: T::AccountId = whitelisted_caller();
+		let _ = T::Currency::make_free_balance_be(
+			&caller,
+			T::Currency::minimum_balance() * 10u32.into(),
+		);
 		let element_hash = T::ElementHash::default();
 		let _ = Pallet::<T>::add_element(RawOrigin::Signed(caller.clone()).into(), element_hash);
 		assert!(Vault::<T>::get(element_hash).is_some());

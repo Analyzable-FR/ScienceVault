@@ -297,6 +297,8 @@ impl pallet_vault::Config for Runtime {
 	type ElementHash = sp_core::H256;
 	type RewardHandler = RewardHandler<Runtime>;
 	type AccountIdOf = AccountIdOf<Runtime>;
+	type Currency = Balances;
+	type FeePrice = frame_support::traits::ConstU128<10>;
 }
 
 impl pallet_reward::Config for Runtime {

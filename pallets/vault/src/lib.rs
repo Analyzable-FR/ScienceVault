@@ -6,7 +6,11 @@ use pallet_timestamp::{self as timestamp};
 
 use codec::{Codec, Decode, Encode, MaxEncodedLen};
 use core::fmt::Debug;
-use frame_support::{pallet_prelude::TypeInfo, BoundedVec};
+use frame_support::{
+	pallet_prelude::TypeInfo,
+	traits::{Currency, ExistenceRequirement, ReservableCurrency, WithdrawReasons},
+	BoundedVec,
+};
 #[cfg(feature = "std")]
 use sp_runtime::serde::{Deserialize, Serialize};
 use sp_runtime::traits::{AtLeast32BitUnsigned, ConstU32, Convert, One};
@@ -67,6 +71,11 @@ pub mod pallet {
 		type RewardHandler: Reward<Self::AccountId>;
 		/// Type representing the convertion between an elementHash and an accountId
 		type AccountIdOf: Convert<Self::ElementHash, Option<Self::AccountId>>;
+		type Currency: ReservableCurrency<Self::AccountId>;
+		#[pallet::constant]
+		type FeePrice: Get<
+			<Self::Currency as frame_support::traits::Currency<Self::AccountId>>::Balance,
+		>;
 	}
 
 	// Map vault element id to element hash.
@@ -121,6 +130,12 @@ pub mod pallet {
 		pub fn add_element(origin: OriginFor<T>, element: T::ElementHash) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			if !Vault::<T>::contains_key(element) {
+				T::Currency::withdraw(
+					&who,
+					T::FeePrice::get(),
+					WithdrawReasons::FEE,
+					ExistenceRequirement::KeepAlive,
+				)?;
 				let element_id = NextVaultElementId::<T>::get();
 				let timestamp = timestamp::Pallet::<T>::get();
 				Vault::<T>::insert(
