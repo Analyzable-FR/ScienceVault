@@ -306,6 +306,13 @@ impl pallet_reward::Config for Runtime {
 	type WeightInfo = weights::pallet_reward::WeightInfo<Runtime>;
 }
 
+impl pallet_utility::Config for Runtime {
+  type RuntimeEvent = RuntimeEvent;
+  type RuntimeCall = RuntimeCall;
+  type PalletsOrigin = OriginCaller;
+  type WeightInfo = weights::pallet_utility::WeightInfo<Runtime>;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub struct Runtime {
@@ -318,6 +325,7 @@ construct_runtime!(
 		Sudo: pallet_sudo,
 		Vault: pallet_vault,
 		Reward: pallet_reward,
+		Utility: pallet_utility,
 	}
 );
 
@@ -366,6 +374,7 @@ mod benches {
 		[pallet_sudo, Sudo]
 		[pallet_vault, Vault]
 		[pallet_reward, Reward]
+		[pallet_utility, Utility]
 	);
 }
 
