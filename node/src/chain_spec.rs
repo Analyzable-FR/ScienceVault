@@ -143,7 +143,7 @@ fn testnet_genesis(
 			..Default::default()
 		},
 		balances: BalancesConfig {
-			balances: endowed_accounts.iter().cloned().map(|k| (k, 10000000000000)).collect(),
+			balances: endowed_accounts.iter().cloned().map(|k| (k, 100_000_000_000_000)).collect(),
 		},
 		aura: AuraConfig {
 			authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect(),
@@ -158,5 +158,6 @@ fn testnet_genesis(
 		},
 		transaction_payment: Default::default(),
 		reward: Default::default(),
+		treasury: Default::default(),
 	}
 }
