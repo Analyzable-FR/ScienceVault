@@ -1,7 +1,6 @@
 use crate as pallet_reward;
 use frame_support::traits::{ConstU16, ConstU64};
 use pallet_timestamp::{self as timestamp};
-use pallet_vault;
 use sp_core::H256;
 use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup},
@@ -61,6 +60,9 @@ impl pallet_vault::Config for Test {
 	type ElementHash = u8;
 	type RewardHandler = ();
 	type AccountIdOf = ();
+	type Currency = ();
+	type FeePrice = frame_support::traits::ConstU32<1>;
+	type OnFee = ();
 }
 
 impl pallet_reward::Config for Test {

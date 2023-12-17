@@ -79,6 +79,7 @@ impl pallet_vault::Config for Test {
 	type AccountIdOf = ();
 	type Currency = ();
 	type FeePrice = ConstU32<10>;
+	type OnFee = ();
 }
 
 // Build genesis storage according to the mock runtime.

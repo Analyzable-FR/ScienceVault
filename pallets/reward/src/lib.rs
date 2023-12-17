@@ -83,7 +83,7 @@ pub mod pallet {
 	#[pallet::genesis_build]
 	impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
 		fn build(&self) {
-			MaxRawReputation::<T>::put(&self.initial_reputation);
+			MaxRawReputation::<T>::put(self.initial_reputation);
 		}
 	}
 
@@ -145,10 +145,10 @@ pub mod pallet {
 						Self::deposit_event(Event::AccountRewarded { account, who, amount });
 						Ok(())
 					} else {
-						return Err(Error::<T>::AccountNotFound.into());
+						Err(Error::<T>::AccountNotFound.into())
 					}
 				} else {
-					return Err(Error::<T>::AccountNeedToParticipateBeforeVoting.into());
+					Err(Error::<T>::AccountNeedToParticipateBeforeVoting.into())
 				}
 			})
 		}
@@ -171,17 +171,17 @@ pub mod pallet {
 						Self::deposit_event(Event::AccountPunished { account, who, amount });
 						Ok(())
 					} else {
-						return Err(Error::<T>::AccountNotFound.into());
+						Err(Error::<T>::AccountNotFound.into())
 					}
 				} else {
-					return Err(Error::<T>::AccountNeedToParticipateBeforeVoting.into());
+					Err(Error::<T>::AccountNeedToParticipateBeforeVoting.into())
 				}
 			})
 		}
 		#[pallet::call_index(2)]
 		#[pallet::weight(<T as pallet::Config>::WeightInfo::slash())]
 		pub fn slash(origin: OriginFor<T>, account: T::AccountId, amount: u128) -> DispatchResult {
-			let _ = ensure_root(origin)?;
+			ensure_root(origin)?;
 			Reputations::<T>::try_mutate_exists(account.clone(), |reputation| {
 				if let Some(ref mut reputation) = reputation {
 					reputation.score = reputation.score.saturating_sub(100 * amount);
@@ -194,7 +194,7 @@ pub mod pallet {
 					reputation.last_evaluation = frame_system::Pallet::<T>::current_block_number();
 					Ok(())
 				} else {
-					return Err(Error::<T>::AccountNotFound.into());
+					Err(Error::<T>::AccountNotFound.into())
 				}
 			})
 		}
@@ -253,7 +253,7 @@ pub mod pallet {
 					reputation.last_evaluation = frame_system::Pallet::<T>::current_block_number();
 					Ok(())
 				} else {
-					return Err(Error::<T>::AccountNotFound.into());
+					Err(Error::<T>::AccountNotFound.into())
 				}
 			})
 		}

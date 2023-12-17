@@ -1,5 +1,5 @@
 use crate::{mock::*, Error, Event};
-use frame_support::{assert_noop, assert_ok, bounded_vec, pallet_prelude::ConstU32, BoundedVec};
+use frame_support::{assert_noop, assert_ok};
 use sp_runtime::traits::BadOrigin;
 
 #[test]

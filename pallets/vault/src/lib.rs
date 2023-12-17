@@ -137,7 +137,7 @@ pub mod pallet {
 					WithdrawReasons::FEE,
 					ExistenceRequirement::KeepAlive,
 				)
-				.map(|i| T::OnFee::on_unbalanced(i))?;
+				.map(T::OnFee::on_unbalanced)?;
 				let element_id = NextVaultElementId::<T>::get();
 				let timestamp = timestamp::Pallet::<T>::get();
 				Vault::<T>::insert(
@@ -171,8 +171,7 @@ pub mod pallet {
 			Vault::<T>::try_mutate_exists(element, |data| {
 				if let Some(ref mut data) = data {
 					if data.owner == who {
-						let _ = data
-							.sources
+						data.sources
 							.try_push(source.clone())
 							.map_err(|_| Error::<T>::SourcesFull)?;
 						Self::deposit_event(Event::SourceAdded {
@@ -181,17 +180,17 @@ pub mod pallet {
 						});
 						Ok(())
 					} else {
-						return Err(Error::<T>::NotOwned.into());
+						Err(Error::<T>::NotOwned.into())
 					}
 				} else {
-					return Err(Error::<T>::NotFound.into());
+					Err(Error::<T>::NotFound.into())
 				}
 			})
 		}
 		#[pallet::call_index(2)]
 		#[pallet::weight(<T as pallet::Config>::WeightInfo::delete_element())]
 		pub fn delete_element(origin: OriginFor<T>, element: T::ElementHash) -> DispatchResult {
-			let _ = ensure_root(origin)?;
+			ensure_root(origin)?;
 			if let Some(data) = Vault::<T>::take(element) {
 				Self::deposit_event(Event::DeletedFromVault { element_id: data.element_id });
 				Ok(())
