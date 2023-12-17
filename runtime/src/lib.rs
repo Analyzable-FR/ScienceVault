@@ -8,6 +8,7 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use frame_support::PalletId;
 use frame_system::{EnsureRoot, EnsureRootWithSuccess};
+use pallet_balances::NegativeImbalance;
 use pallet_grandpa::AuthorityId as GrandpaId;
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -18,7 +19,7 @@ use sp_runtime::{
 		AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, NumberFor, One, Verify,
 	},
 	transaction_validity::{TransactionSource, TransactionValidity},
-	ApplyExtrinsicResult, MultiSignature, Percent,
+	ApplyExtrinsicResult, MultiSignature,
 };
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -235,6 +236,16 @@ impl pallet_timestamp::Config for Runtime {
 /// Existential deposit.
 pub const EXISTENTIAL_DEPOSIT: u128 = 10_000_000_000_000;
 
+pub struct HandleDust;
+type CreditOf = frame_support::traits::tokens::fungible::Credit<AccountId, Balances>;
+impl frame_support::traits::OnUnbalanced<CreditOf> for HandleDust {
+	fn on_nonzero_unbalanced(amount: CreditOf) {
+		use frame_support::traits::{Currency as _, Imbalance as _};
+		let imbalance = NegativeImbalance::new(amount.peek());
+		Balances::resolve_creating(&Treasury::account_id(), imbalance);
+	}
+}
+
 impl pallet_balances::Config for Runtime {
 	type MaxLocks = ConstU32<50>;
 	type MaxReserves = ();
@@ -243,7 +254,7 @@ impl pallet_balances::Config for Runtime {
 	type Balance = Balance;
 	/// The ubiquitous event type.
 	type RuntimeEvent = RuntimeEvent;
-	type DustRemoval = ();
+	type DustRemoval = HandleDust;
 	type ExistentialDeposit = ConstU128<EXISTENTIAL_DEPOSIT>;
 	type AccountStore = System;
 	type WeightInfo = weights::pallet_balances::WeightInfo<Runtime>;
@@ -259,7 +270,7 @@ parameter_types! {
 
 impl pallet_transaction_payment::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type OnChargeTransaction = CurrencyAdapter<Balances, ()>;
+	type OnChargeTransaction = CurrencyAdapter<Balances, Treasury>;
 	type OperationalFeeMultiplier = ConstU8<20>;
 	type WeightToFee = IdentityFee<Balance>;
 	type LengthToFee = IdentityFee<Balance>;
@@ -300,7 +311,8 @@ impl pallet_vault::Config for Runtime {
 	type RewardHandler = RewardHandler<Runtime>;
 	type AccountIdOf = AccountIdOf<Runtime>;
 	type Currency = Balances;
-	type FeePrice = frame_support::traits::ConstU128<10>;
+	type FeePrice = frame_support::traits::ConstU128<10_000_000_000_000>;
+	type OnFee = Treasury;
 }
 
 impl pallet_reward::Config for Runtime {

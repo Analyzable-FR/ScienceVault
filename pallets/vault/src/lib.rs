@@ -8,7 +8,7 @@ use codec::{Codec, Decode, Encode, MaxEncodedLen};
 use core::fmt::Debug;
 use frame_support::{
 	pallet_prelude::TypeInfo,
-	traits::{Currency, ExistenceRequirement, ReservableCurrency, WithdrawReasons},
+	traits::{Currency, ExistenceRequirement, OnUnbalanced, ReservableCurrency, WithdrawReasons},
 	BoundedVec,
 };
 #[cfg(feature = "std")]
@@ -76,6 +76,7 @@ pub mod pallet {
 		type FeePrice: Get<
 			<Self::Currency as frame_support::traits::Currency<Self::AccountId>>::Balance,
 		>;
+		type OnFee: OnUnbalanced<<<Self as Config>::Currency as Currency<<Self as frame_system::Config>::AccountId,>>::NegativeImbalance>;
 	}
 
 	// Map vault element id to element hash.
@@ -135,7 +136,8 @@ pub mod pallet {
 					T::FeePrice::get(),
 					WithdrawReasons::FEE,
 					ExistenceRequirement::KeepAlive,
-				)?;
+				)
+				.map(|i| T::OnFee::on_unbalanced(i))?;
 				let element_id = NextVaultElementId::<T>::get();
 				let timestamp = timestamp::Pallet::<T>::get();
 				Vault::<T>::insert(
