@@ -3,7 +3,6 @@
 pub use pallet::*;
 
 use codec::{Decode, Encode, MaxEncodedLen};
-use core::fmt::Debug;
 use frame_support::{pallet_prelude::TypeInfo, traits::BuildGenesisConfig};
 #[cfg(feature = "std")]
 use sp_runtime::serde::{Deserialize, Serialize};

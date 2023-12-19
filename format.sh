@@ -1,5 +1,2 @@
-cargo fmt -p pallet-vault
-cargo fmt -p pallet-reward
-cargo fmt -p science-vault
-cargo fmt -p science-vault-runtime
-cargo clippy --all --tests -- -D warnings
+cargo fmt --all
+cargo clippy --features runtime-benchmarks --all --tests -- -D warnings
