@@ -323,6 +323,7 @@ impl pallet_vault::Config for Runtime {
 impl pallet_reward::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = weights::pallet_reward::WeightInfo<Runtime>;
+	type Currency = Balances;
 }
 
 impl pallet_utility::Config for Runtime {

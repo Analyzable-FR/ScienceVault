@@ -3,7 +3,10 @@
 pub use pallet::*;
 
 use codec::{Decode, Encode, MaxEncodedLen};
-use frame_support::{pallet_prelude::TypeInfo, traits::BuildGenesisConfig};
+use frame_support::{
+	pallet_prelude::TypeInfo,
+	traits::{BuildGenesisConfig, Currency},
+};
 #[cfg(feature = "std")]
 use sp_runtime::serde::{Deserialize, Serialize};
 use sp_runtime::{
@@ -65,6 +68,7 @@ pub mod pallet {
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 		/// Type representing the weight of this pallet
 		type WeightInfo: WeightInfo;
+		type Currency: Currency<Self::AccountId>;
 	}
 
 	#[pallet::genesis_config]
@@ -127,6 +131,7 @@ pub mod pallet {
 			if who == account {
 				return Err(Error::<T>::CannotRewardItself.into());
 			}
+			let amount = core::cmp::max(amount, 100);
 			Reputations::<T>::try_mutate_exists(account.clone(), |reputation| {
 				if let Some(rewarder_reputation) = Reputations::<T>::get(&who) {
 					if let Some(ref mut reputation) = reputation {
@@ -158,6 +163,7 @@ pub mod pallet {
 			if who == account {
 				return Err(Error::<T>::CannotRewardItself.into());
 			}
+			let amount = core::cmp::max(amount, 100);
 			Reputations::<T>::try_mutate_exists(account.clone(), |reputation| {
 				if let Some(rewarder_reputation) = Reputations::<T>::get(&who) {
 					if let Some(ref mut reputation) = reputation {
@@ -269,7 +275,13 @@ pub mod pallet {
 				}
 				while total_weight.any_lt(remaining_weight.saturating_sub(overhead)) {
 					if let Some(account) = queue.pop() {
-						let _ = Self::do_evaluate_reputation(account);
+						let _ = Self::do_evaluate_reputation(account.clone());
+						let _ = T::Currency::deposit_into_existing(
+							&account,
+							(Reputations::<T>::get(account.clone()).unwrap().reputation *
+								T::Currency::minimum_balance())
+							.into(),
+						);
 						total_weight += overhead;
 					} else {
 						break;
