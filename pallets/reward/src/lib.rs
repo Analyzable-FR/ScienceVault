@@ -187,7 +187,7 @@ pub mod pallet {
 		#[pallet::weight(<T as pallet::Config>::WeightInfo::slash())]
 		pub fn slash(origin: OriginFor<T>, account: T::AccountId, amount: u128) -> DispatchResult {
 			ensure_root(origin)?;
-			Reputations::<T>::try_mutate_exists(account.clone(), |reputation| {
+			Reputations::<T>::try_mutate_exists(&account, |reputation| {
 				if let Some(ref mut reputation) = reputation {
 					reputation.score = reputation.score.saturating_sub(100 * amount);
 					let raw_reputation = reputation.score * reputation.contribution;
@@ -207,7 +207,7 @@ pub mod pallet {
 		#[pallet::weight(<T as pallet::Config>::WeightInfo::slash())]
 		pub fn evaluate_reputation(origin: OriginFor<T>, account: T::AccountId) -> DispatchResult {
 			let _who = ensure_signed(origin)?;
-			Self::do_evaluate_reputation(account)
+			Self::do_evaluate_reputation(&account)
 		}
 	}
 	#[pallet::hooks]
@@ -246,8 +246,8 @@ pub mod pallet {
 			let raw_reputation = reputation.score * reputation.contribution;
 			Perbill::from_rational(raw_reputation * 100, MaxRawReputation::<T>::get() + 1)
 		}
-		fn do_evaluate_reputation(account: T::AccountId) -> DispatchResult {
-			Reputations::<T>::try_mutate_exists(account.clone(), |reputation| {
+		fn do_evaluate_reputation(account: &T::AccountId) -> DispatchResult {
+			Reputations::<T>::try_mutate_exists(account, |reputation| {
 				if let Some(ref mut reputation) = reputation {
 					let raw_reputation = reputation.score * reputation.contribution;
 					MaxRawReputation::<T>::put(core::cmp::max(
@@ -275,10 +275,11 @@ pub mod pallet {
 				}
 				while total_weight.any_lt(remaining_weight.saturating_sub(overhead)) {
 					if let Some(account) = queue.pop() {
-						let _ = Self::do_evaluate_reputation(account.clone());
+						let _ = Self::do_evaluate_reputation(&account);
 						let _ = T::Currency::deposit_into_existing(
 							&account,
-							(Reputations::<T>::get(account.clone()).unwrap().reputation *
+							(Reputations::<T>::get(&account)
+								.map_or_else(|| Perbill::zero(), |account| account.reputation) *
 								T::Currency::minimum_balance())
 							.into(),
 						);
