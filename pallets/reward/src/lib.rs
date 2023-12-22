@@ -69,6 +69,8 @@ pub mod pallet {
 		/// Type representing the weight of this pallet
 		type WeightInfo: WeightInfo;
 		type Currency: Currency<Self::AccountId>;
+		#[pallet::constant]
+		type ReevaluationPeriod: Get<u32>;
 	}
 
 	#[pallet::genesis_config]
@@ -131,7 +133,7 @@ pub mod pallet {
 			if who == account {
 				return Err(Error::<T>::CannotRewardItself.into());
 			}
-			let amount = core::cmp::max(amount, 100);
+			let amount = core::cmp::min(amount, 100);
 			Reputations::<T>::try_mutate_exists(account.clone(), |reputation| {
 				if let Some(rewarder_reputation) = Reputations::<T>::get(&who) {
 					if let Some(ref mut reputation) = reputation {
@@ -163,7 +165,7 @@ pub mod pallet {
 			if who == account {
 				return Err(Error::<T>::CannotRewardItself.into());
 			}
-			let amount = core::cmp::max(amount, 100);
+			let amount = core::cmp::min(amount, 100);
 			Reputations::<T>::try_mutate_exists(account.clone(), |reputation| {
 				if let Some(rewarder_reputation) = Reputations::<T>::get(&who) {
 					if let Some(ref mut reputation) = reputation {
@@ -216,7 +218,8 @@ pub mod pallet {
 		BlockNumberFor<T>: From<u32>,
 	{
 		fn on_idle(block: BlockNumberFor<T>, remaining_weight: Weight) -> Weight {
-			if block % BlockNumberFor::<T>::one().saturating_mul(10.into()) ==
+			if block %
+				BlockNumberFor::<T>::one().saturating_mul(T::ReevaluationPeriod::get().into()) ==
 				BlockNumberFor::<T>::zero()
 			{
 				return Self::process_evaluation_queue(remaining_weight);
@@ -278,10 +281,9 @@ pub mod pallet {
 						let _ = Self::do_evaluate_reputation(&account);
 						let _ = T::Currency::deposit_into_existing(
 							&account,
-							(Reputations::<T>::get(&account)
-								.map_or_else(|| Perbill::zero(), |account| account.reputation) *
-								T::Currency::minimum_balance())
-							.into(),
+							Reputations::<T>::get(&account)
+								.map_or_else(Perbill::zero, |account| account.reputation) *
+								T::Currency::minimum_balance(),
 						);
 						total_weight += overhead;
 					} else {

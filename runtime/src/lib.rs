@@ -324,6 +324,7 @@ impl pallet_reward::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = weights::pallet_reward::WeightInfo<Runtime>;
 	type Currency = Balances;
+	type ReevaluationPeriod = ConstU32<10>; // ~1 minute
 }
 
 impl pallet_utility::Config for Runtime {
