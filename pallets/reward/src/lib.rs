@@ -137,7 +137,7 @@ pub mod pallet {
 			Reputations::<T>::try_mutate_exists(account.clone(), |reputation| {
 				if let Some(rewarder_reputation) = Reputations::<T>::get(&who) {
 					if let Some(ref mut reputation) = reputation {
-						let rewarder_reputation = Self::compute_reputation(rewarder_reputation);
+						let rewarder_reputation = Self::compute_reputation(&rewarder_reputation);
 						reputation.score =
 							reputation.score.saturating_add(rewarder_reputation * amount);
 						let raw_reputation = reputation.score * reputation.contribution;
@@ -145,7 +145,7 @@ pub mod pallet {
 							raw_reputation,
 							MaxRawReputation::<T>::get(),
 						));
-						reputation.reputation = Self::compute_reputation(reputation.clone());
+						reputation.reputation = Self::compute_reputation(reputation);
 						reputation.last_evaluation =
 							frame_system::Pallet::<T>::current_block_number();
 						Self::deposit_event(Event::AccountRewarded { account, who, amount });
@@ -169,10 +169,10 @@ pub mod pallet {
 			Reputations::<T>::try_mutate_exists(account.clone(), |reputation| {
 				if let Some(rewarder_reputation) = Reputations::<T>::get(&who) {
 					if let Some(ref mut reputation) = reputation {
-						let rewarder_reputation = Self::compute_reputation(rewarder_reputation);
+						let rewarder_reputation = Self::compute_reputation(&rewarder_reputation);
 						reputation.score =
 							reputation.score.saturating_sub(rewarder_reputation * amount);
-						reputation.reputation = Self::compute_reputation(reputation.clone());
+						reputation.reputation = Self::compute_reputation(reputation);
 						reputation.last_evaluation =
 							frame_system::Pallet::<T>::current_block_number();
 						Self::deposit_event(Event::AccountPunished { account, who, amount });
@@ -197,7 +197,7 @@ pub mod pallet {
 						raw_reputation,
 						MaxRawReputation::<T>::get(),
 					));
-					reputation.reputation = Self::compute_reputation(reputation.clone());
+					reputation.reputation = Self::compute_reputation(reputation);
 					reputation.last_evaluation = frame_system::Pallet::<T>::current_block_number();
 					Ok(())
 				} else {
@@ -245,9 +245,9 @@ pub mod pallet {
 				}
 			});
 		}
-		fn compute_reputation(reputation: Reputation<BlockNumberFor<T>>) -> Perbill {
+		fn compute_reputation(reputation: &Reputation<BlockNumberFor<T>>) -> Perbill {
 			let raw_reputation = reputation.score * reputation.contribution;
-			Perbill::from_rational(raw_reputation * 100, MaxRawReputation::<T>::get() + 1)
+			Perbill::from_rational(raw_reputation, MaxRawReputation::<T>::get() + 1)
 		}
 		fn do_evaluate_reputation(account: &T::AccountId) -> DispatchResult {
 			Reputations::<T>::try_mutate_exists(account, |reputation| {
@@ -257,7 +257,7 @@ pub mod pallet {
 						raw_reputation,
 						MaxRawReputation::<T>::get(),
 					));
-					reputation.reputation = Self::compute_reputation(reputation.clone());
+					reputation.reputation = Self::compute_reputation(reputation);
 					reputation.last_evaluation = frame_system::Pallet::<T>::current_block_number();
 					Ok(())
 				} else {
