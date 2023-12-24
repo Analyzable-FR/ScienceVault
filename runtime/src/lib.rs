@@ -305,7 +305,7 @@ where
 	T: pallet_vault::Config,
 {
 	fn convert(element: T::ElementHash) -> Option<T::AccountId> {
-		pallet_vault::Pallet::<T>::account_id_of(element)
+		pallet_vault::Pallet::<T>::account_id_of(&element)
 	}
 }
 impl pallet_vault::Config for Runtime {

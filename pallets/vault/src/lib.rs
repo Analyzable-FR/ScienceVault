@@ -200,7 +200,7 @@ pub mod pallet {
 		}
 	}
 	impl<T: Config> Pallet<T> {
-		pub fn account_id_of(element: T::ElementHash) -> Option<T::AccountId> {
+		pub fn account_id_of(element: &T::ElementHash) -> Option<T::AccountId> {
 			if let Some(data) = Vault::<T>::get(element) {
 				return Some(data.owner);
 			}
