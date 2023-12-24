@@ -87,6 +87,7 @@ impl pallet_reward::Config for Test {
 	type WeightInfo = ();
 	type Currency = Balances;
 	type ReevaluationPeriod = ConstU32<10>;
+	type Dividend = ConstU32<1>;
 }
 
 // Build genesis storage according to the mock runtime.

@@ -24,6 +24,9 @@ mod benchmarking;
 pub mod weights;
 pub use weights::*;
 
+pub type BalanceOf<T> =
+	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+
 #[cfg_attr(feature = "std", derive(Debug, Deserialize, Serialize))]
 #[derive(Encode, Decode, Clone, PartialEq, Eq, TypeInfo, MaxEncodedLen)]
 pub struct Reputation<BlockNumber> {
@@ -71,6 +74,8 @@ pub mod pallet {
 		type Currency: Currency<Self::AccountId>;
 		#[pallet::constant]
 		type ReevaluationPeriod: Get<u32>;
+		#[pallet::constant]
+		type Dividend: Get<BalanceOf<Self>>;
 	}
 
 	#[pallet::genesis_config]
@@ -283,7 +288,7 @@ pub mod pallet {
 							&account,
 							Reputations::<T>::get(&account)
 								.map_or_else(Perbill::zero, |account| account.reputation) *
-								T::Currency::minimum_balance(),
+								T::Dividend::get(),
 						);
 						total_weight += overhead;
 					} else {
