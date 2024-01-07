@@ -1,13 +1,13 @@
 [package]
 name = "pallet-vault"
-version = "4.0.0-dev"
-description = ""
-authors = ["Benjamin Gallois"]
-homepage = ""
+version = "0.0.1-dev"
+description = "ScienceVault a decentralized blockchain for transparent scientific data integrity."
+authors = ["Analyzable"]
+homepage = "https://github.com/Analyzable-FR/ScienceVault"
 edition = "2021"
 license = "MIT-0"
 publish = false
-repository = ""
+repository = "https://github.com/Analyzable-FR/ScienceVault"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
@@ -26,7 +26,7 @@ sp-runtime = { version = "24.0.0", default-features = false, git = "https://gith
 pallet-timestamp = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 
 # Local Dependencies
-pallet-reward = { version = "4.0.0-dev", default-features = false, path = "../reward" }
+pallet-reward = { version = "0.0.1-dev", default-features = false, path = "../reward" }
 
 [dev-dependencies]
 sp-core = { version = "21.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }

@@ -1,13 +1,13 @@
 [package]
 name = "science-vault"
-version = "4.0.0-dev"
-description = "A fresh FRAME-based Substrate node, ready for hacking."
-authors = ["Substrate DevHub <https://github.com/substrate-developer-hub>"]
-homepage = "https://substrate.io/"
+version = "0.0.1-dev"
+description = "ScienceVault a decentralized blockchain for transparent scientific data integrity."
+authors = ["Analyzable"]
+homepage = "https://github.com/Analyzable-FR/ScienceVault"
 edition = "2021"
 license = "MIT-0"
 publish = false
-repository = "https://github.com/substrate-developer-hub/substrate-node-template/"
+repository = "https://github.com/Analyzable-FR/ScienceVault"
 build = "build.rs"
 
 [package.metadata.docs.rs]
@@ -47,7 +47,7 @@ pallet-transaction-payment = { version = "4.0.0-dev", default-features = false, 
 pallet-treasury = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 
 # These dependencies are used for the node template's RPCs
-jsonrpsee = { version = "0.21.0", features = ["server"] }
+jsonrpsee = { version = "0.16.3", features = ["server"] }
 sp-api = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 sc-rpc-api = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 sp-blockchain = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
@@ -61,7 +61,7 @@ frame-benchmarking = { version = "4.0.0-dev", git = "https://github.com/parityte
 frame-benchmarking-cli = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 
 # Local Dependencies
-science-vault-runtime = { version = "4.0.0-dev", path = "../runtime" }
+science-vault-runtime = { version = "0.0.1-dev", path = "../runtime" }
 
 # CLI-specific dependencies
 try-runtime-cli = { version = "0.10.0-dev", optional = true, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
