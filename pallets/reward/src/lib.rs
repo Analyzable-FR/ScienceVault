@@ -223,9 +223,9 @@ pub mod pallet {
 		BlockNumberFor<T>: From<u32>,
 	{
 		fn on_idle(block: BlockNumberFor<T>, remaining_weight: Weight) -> Weight {
-			if block %
-				BlockNumberFor::<T>::one().saturating_mul(T::ReevaluationPeriod::get().into()) ==
-				BlockNumberFor::<T>::zero()
+			if block
+				% BlockNumberFor::<T>::one().saturating_mul(T::ReevaluationPeriod::get().into())
+				== BlockNumberFor::<T>::zero()
 			{
 				return Self::process_evaluation_queue(remaining_weight);
 			}
@@ -287,8 +287,8 @@ pub mod pallet {
 						let _ = T::Currency::deposit_into_existing(
 							&account,
 							Reputations::<T>::get(&account)
-								.map_or_else(Perbill::zero, |account| account.reputation) *
-								T::Dividend::get(),
+								.map_or_else(Perbill::zero, |account| account.reputation)
+								* T::Dividend::get(),
 						);
 						total_weight += overhead;
 					} else {
