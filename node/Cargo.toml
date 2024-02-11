@@ -60,7 +60,7 @@ try-runtime-cli = { workspace = true }
 substrate-build-script-utils = { workspace = true }
 
 [features]
-default = []
+default = ["std"]
 runtime-benchmarks = [
 	"frame-benchmarking-cli/runtime-benchmarks",
 	"frame-benchmarking/runtime-benchmarks",
