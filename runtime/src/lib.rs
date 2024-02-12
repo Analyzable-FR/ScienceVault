@@ -13,13 +13,22 @@ use frame_benchmarking::{BenchmarkBatch, BenchmarkList};
 #[cfg(feature = "runtime-benchmarks")]
 use frame_support::traits::TrackedStorageKey;
 
+use crate::weights::extrinsic_weights::ExtrinsicBaseWeight;
+use frame_support::weights::WeightToFee;
+use frame_support::weights::WeightToFeeCoefficient;
+use frame_support::weights::WeightToFeeCoefficients;
+use frame_support::weights::WeightToFeePolynomial;
 use frame_support::PalletId;
 use frame_system::{EnsureRoot, EnsureRootWithSuccess};
 use pallet_balances::NegativeImbalance;
 use pallet_grandpa::AuthorityId as GrandpaId;
+use smallvec::smallvec;
 use sp_api::impl_runtime_apis;
+use sp_arithmetic::traits::{BaseArithmetic, Unsigned};
+use sp_arithmetic::MultiplyRational;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
+use sp_runtime::SaturatedConversion;
 use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
     traits::{
@@ -278,12 +287,42 @@ parameter_types! {
     pub FeeMultiplier: Multiplier = Multiplier::one();
 }
 
+pub struct LengthToFeeImpl<T>(sp_std::marker::PhantomData<T>);
+impl<T> WeightToFee for LengthToFeeImpl<T>
+where
+    T: BaseArithmetic + From<u32> + Copy + Unsigned,
+{
+    type Balance = T;
+    fn weight_to_fee(length_in_bytes: &Weight) -> Self::Balance {
+        Self::Balance::saturated_from(length_in_bytes.ref_time() / 100u64)
+    }
+}
+
+pub struct WeightToFeeImpl<T>(sp_std::marker::PhantomData<T>);
+impl<T> WeightToFeePolynomial for WeightToFeeImpl<T>
+where
+    T: BaseArithmetic + From<u64> + Copy + Unsigned + From<u32> + MultiplyRational,
+{
+    type Balance = T;
+
+    fn polynomial() -> WeightToFeeCoefficients<Self::Balance> {
+        let p: Self::Balance = 1_000_000_000_000_000u64.into();
+        let q: Self::Balance = Self::Balance::from(ExtrinsicBaseWeight::get().ref_time());
+        smallvec![WeightToFeeCoefficient {
+            degree: 1,
+            negative: false,
+            coeff_frac: Perbill::from_rational(p % q, q),
+            coeff_integer: p / q,
+        }]
+    }
+}
+
 impl pallet_transaction_payment::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type OnChargeTransaction = CurrencyAdapter<Balances, Treasury>;
     type OperationalFeeMultiplier = ConstU8<20>;
-    type WeightToFee = IdentityFee<Balance>;
-    type LengthToFee = IdentityFee<Balance>;
+    type WeightToFee = LengthToFeeImpl<Balance>;
+    type LengthToFee = WeightToFeeImpl<Balance>;
     type FeeMultiplierUpdate = ConstFeeMultiplier<FeeMultiplier>;
 }
 

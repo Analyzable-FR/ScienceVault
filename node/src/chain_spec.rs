@@ -152,7 +152,7 @@ fn testnet_genesis(
             balances: endowed_accounts
                 .iter()
                 .cloned()
-                .map(|k| (k, EXISTENTIAL_DEPOSIT * 1_000))
+                .map(|k| (k, EXISTENTIAL_DEPOSIT * 10))
                 .collect(),
         },
         aura: AuraConfig {

@@ -33,6 +33,8 @@ pallet-treasury = { workspace = true }
 pallet-utility = { workspace = true }
 pallet-vault = { workspace = true }
 scale-info = { workspace = true, features = ["derive"] }
+smallvec = { workspace = true }
+sp-arithmetic = { workspace = true }
 sp-api = { workspace = true }
 sp-block-builder = { workspace = true }
 sp-consensus-aura = { workspace = true }

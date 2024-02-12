@@ -73,9 +73,9 @@ dependencies = [
 
 [[package]]
 name = "ahash"
-version = "0.7.7"
+version = "0.7.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a824f2aa7e75a0c98c5a504fceb80649e9c35265d44525b5f94de4771a395cd"
+checksum = "891477e0c6a8957309ee5c45a6368af3ae14bb510732d2684ffa19af310920f9"
 dependencies = [
  "getrandom 0.2.12",
  "once_cell",
@@ -84,9 +84,9 @@ dependencies = [
 
 [[package]]
 name = "ahash"
-version = "0.8.7"
+version = "0.8.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "77c3a9648d43b9cd48db467b3f87fdd6e146bcc88ab0180006cef2179fe11d01"
+checksum = "42cd52102d3df161c77a887b608d7a4897d7cc112886a9537b738a887a03aaff"
 dependencies = [
  "cfg-if",
  "getrandom 0.2.12",
@@ -1103,9 +1103,9 @@ dependencies = [
 
 [[package]]
 name = "chrono"
-version = "0.4.33"
+version = "0.4.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9f13690e35a5e4ace198e7beea2895d29f3a9cc55015fcebe6336bd2010af9eb"
+checksum = "5bc015644b92d5890fab7489e49d21f879d5c990186827d42ec511919404f38b"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
@@ -2849,7 +2849,7 @@ version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
 dependencies = [
- "ahash 0.7.7",
+ "ahash 0.7.8",
 ]
 
 [[package]]
@@ -2858,7 +2858,7 @@ version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "43a3c133739dddd0d2990f9a4bdf8eb4b21ef50e4851ca85ab661199821d510e"
 dependencies = [
- "ahash 0.8.7",
+ "ahash 0.8.8",
 ]
 
 [[package]]
@@ -2867,7 +2867,7 @@ version = "0.14.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "290f1a1d9242c78d09ce40a5e87e7554ee637af1351968159f4952f028f75604"
 dependencies = [
- "ahash 0.8.7",
+ "ahash 0.8.8",
  "allocator-api2",
 ]
 
@@ -6359,7 +6359,7 @@ name = "sc-consensus-grandpa"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/polkadot-sdk.git?tag=polkadot-v1.6.0#481165d92297d7dfd5eaf9c7f442441761fc0a12"
 dependencies = [
- "ahash 0.8.7",
+ "ahash 0.8.8",
  "array-bytes 6.2.2",
  "async-trait",
  "dyn-clone",
@@ -6616,7 +6616,7 @@ name = "sc-network-gossip"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/polkadot-sdk.git?tag=polkadot-v1.6.0#481165d92297d7dfd5eaf9c7f442441761fc0a12"
 dependencies = [
- "ahash 0.8.7",
+ "ahash 0.8.8",
  "futures",
  "futures-timer",
  "libp2p",
@@ -7116,7 +7116,7 @@ version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "772575a524feeb803e5b0fcbc6dd9f367e579488197c94c6e4023aad2305774d"
 dependencies = [
- "ahash 0.8.7",
+ "ahash 0.8.8",
  "cfg-if",
  "hashbrown 0.13.2",
 ]
@@ -7225,7 +7225,9 @@ dependencies = [
  "pallet-vault",
  "parity-scale-codec",
  "scale-info",
+ "smallvec",
  "sp-api",
+ "sp-arithmetic",
  "sp-block-builder",
  "sp-consensus-aura",
  "sp-consensus-grandpa",
@@ -7860,7 +7862,7 @@ dependencies = [
 [[package]]
 name = "sp-crypto-ec-utils"
 version = "0.10.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#edd95b3749754d2ed0c5738588e872c87be91624"
+source = "git+https://github.com/paritytech/polkadot-sdk#4883e1448210d0efd9a397b41cc184772401ec35"
 dependencies = [
  "ark-bls12-377",
  "ark-bls12-377-ext",
@@ -7900,7 +7902,7 @@ dependencies = [
 [[package]]
 name = "sp-debug-derive"
 version = "14.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#edd95b3749754d2ed0c5738588e872c87be91624"
+source = "git+https://github.com/paritytech/polkadot-sdk#4883e1448210d0efd9a397b41cc184772401ec35"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -7921,7 +7923,7 @@ dependencies = [
 [[package]]
 name = "sp-externalities"
 version = "0.25.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#edd95b3749754d2ed0c5738588e872c87be91624"
+source = "git+https://github.com/paritytech/polkadot-sdk#4883e1448210d0efd9a397b41cc184772401ec35"
 dependencies = [
  "environmental",
  "parity-scale-codec",
@@ -8107,7 +8109,7 @@ dependencies = [
 [[package]]
 name = "sp-runtime-interface"
 version = "24.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#edd95b3749754d2ed0c5738588e872c87be91624"
+source = "git+https://github.com/paritytech/polkadot-sdk#4883e1448210d0efd9a397b41cc184772401ec35"
 dependencies = [
  "bytes",
  "impl-trait-for-tuples",
@@ -8139,7 +8141,7 @@ dependencies = [
 [[package]]
 name = "sp-runtime-interface-proc-macro"
 version = "17.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#edd95b3749754d2ed0c5738588e872c87be91624"
+source = "git+https://github.com/paritytech/polkadot-sdk#4883e1448210d0efd9a397b41cc184772401ec35"
 dependencies = [
  "Inflector",
  "expander",
@@ -8231,7 +8233,7 @@ source = "git+https://github.com/paritytech/polkadot-sdk.git?tag=polkadot-v1.6.0
 [[package]]
 name = "sp-std"
 version = "14.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#edd95b3749754d2ed0c5738588e872c87be91624"
+source = "git+https://github.com/paritytech/polkadot-sdk#4883e1448210d0efd9a397b41cc184772401ec35"
 
 [[package]]
 name = "sp-storage"
@@ -8249,7 +8251,7 @@ dependencies = [
 [[package]]
 name = "sp-storage"
 version = "19.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#edd95b3749754d2ed0c5738588e872c87be91624"
+source = "git+https://github.com/paritytech/polkadot-sdk#4883e1448210d0efd9a397b41cc184772401ec35"
 dependencies = [
  "impl-serde",
  "parity-scale-codec",
@@ -8287,7 +8289,7 @@ dependencies = [
 [[package]]
 name = "sp-tracing"
 version = "16.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#edd95b3749754d2ed0c5738588e872c87be91624"
+source = "git+https://github.com/paritytech/polkadot-sdk#4883e1448210d0efd9a397b41cc184772401ec35"
 dependencies = [
  "parity-scale-codec",
  "sp-std 14.0.0",
@@ -8325,7 +8327,7 @@ name = "sp-trie"
 version = "22.0.0"
 source = "git+https://github.com/paritytech/polkadot-sdk.git?tag=polkadot-v1.6.0#481165d92297d7dfd5eaf9c7f442441761fc0a12"
 dependencies = [
- "ahash 0.8.7",
+ "ahash 0.8.8",
  "hash-db",
  "lazy_static",
  "memory-db",
@@ -8388,7 +8390,7 @@ dependencies = [
 [[package]]
 name = "sp-wasm-interface"
 version = "20.0.0"
-source = "git+https://github.com/paritytech/polkadot-sdk#edd95b3749754d2ed0c5738588e872c87be91624"
+source = "git+https://github.com/paritytech/polkadot-sdk#4883e1448210d0efd9a397b41cc184772401ec35"
 dependencies = [
  "anyhow",
  "impl-trait-for-tuples",
