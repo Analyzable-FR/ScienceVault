@@ -381,7 +381,7 @@ impl pallet_utility::Config for Runtime {
 
 parameter_types! {
     pub const ProposalBond: Permill = Permill::from_percent(1);
-    pub const ProposalBondMinimum: Balance = 100;
+    pub const ProposalBondMinimum: Balance = 1;
     pub const SpendPeriod: BlockNumber = DAYS;
     pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
     pub const MaxApprovals: u32 = 100;
@@ -481,7 +481,7 @@ mod benches {
         [pallet_vault, Vault]
         [pallet_reward, Reward]
         [pallet_utility, Utility]
-        //[pallet_treasury, Treasury] //TODO polkadot-sdk benchmarks are incorrect
+        [pallet_treasury, Treasury] //TODO polkadot-sdk benchmarks are incorrect
     );
 }
 

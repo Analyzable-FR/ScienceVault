@@ -1,0 +1,16 @@
+[package]
+name = "stress-test"
+version = "0.0.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+sp-core = { version = "26.0.0", default-features = false }
+sp-core-hashing = { version = "13.0.0", default-features = false }
+sp-runtime = "29.0.0"
+sp-keyring = "29.0.0"
+rand = "0.8.5"
+subxt = { git = "https://github.com/paritytech/subxt", tag = "v0.33.0" }
+subxt-signer = { git = "https://github.com/paritytech/subxt", tag = "v0.33.0" }
+tokio = { version = "1.35", features = ["macros", "time", "rt-multi-thread"] }
