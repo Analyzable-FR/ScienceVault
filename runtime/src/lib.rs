@@ -279,7 +279,6 @@ impl pallet_balances::Config for Runtime {
     type FreezeIdentifier = ();
     type MaxFreezes = ();
     type RuntimeHoldReason = ();
-    type MaxHolds = ();
     type RuntimeFreezeReason = ();
 }
 
@@ -481,7 +480,7 @@ mod benches {
         [pallet_vault, Vault]
         [pallet_reward, Reward]
         [pallet_utility, Utility]
-        [pallet_treasury, Treasury] //TODO polkadot-sdk benchmarks are incorrect
+        //[pallet_treasury, Treasury] //TODO polkadot-sdk benchmarks are incorrect
     );
 }
 

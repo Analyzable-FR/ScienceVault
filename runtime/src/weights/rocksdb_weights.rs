@@ -1,5 +1,5 @@
-//! THIS FILE WAS AUTO-GENERATED USING THE SUBSTRATE BENCHMARK CLI VERSION 4.0.0-dev
-//! DATE: 2024-02-10 (Y/M/D)
+//! THIS FILE WAS AUTO-GENERATED USING THE SUBSTRATE BENCHMARK CLI VERSION 32.0.0
+//! DATE: 2024-02-19 (Y/M/D)
 //! HOSTNAME: `bgallois-ms7d43`, CPU: `12th Gen Intel(R) Core(TM) i3-12100F`
 //!
 //! DATABASE: `RocksDb`, RUNTIME: `Development`
@@ -32,31 +32,31 @@ pub mod constants {
             /// Calculated by multiplying the *Average* of all values with `2.0` and adding `0`.
             ///
             /// Stats nanoseconds:
-            ///   Min, Max: 1_222, 804_350
-            ///   Average:  27_055
-            ///   Median:   1_698
-            ///   Std-Dev:  139609.27
+            ///   Min, Max: 1_251, 795_568
+            ///   Average:  25_455
+            ///   Median:   1_786
+            ///   Std-Dev:  134064.4
             ///
             /// Percentiles nanoseconds:
-            ///   99th: 804_350
-            ///   95th: 6_335
-            ///   75th: 2_197
-            read: 54_110 * constants::WEIGHT_REF_TIME_PER_NANOS,
+            ///   99th: 795_568
+            ///   95th: 8_200
+            ///   75th: 2_304
+            read: 50_910 * constants::WEIGHT_REF_TIME_PER_NANOS,
 
             /// Time to write one storage item.
             /// Calculated by multiplying the *Average* of all values with `2.0` and adding `0`.
             ///
             /// Stats nanoseconds:
-            ///   Min, Max: 5_853, 12_946_840
-            ///   Average:  415_234
-            ///   Median:   9_647
-            ///   Std-Dev:  2250748.7
+            ///   Min, Max: 6_204, 13_455_084
+            ///   Average:  406_864
+            ///   Median:   9_679
+            ///   Std-Dev:  2271413.08
             ///
             /// Percentiles nanoseconds:
-            ///   99th: 12_946_840
-            ///   95th: 34_763
-            ///   75th: 12_589
-            write: 830_468 * constants::WEIGHT_REF_TIME_PER_NANOS,
+            ///   99th: 13_455_084
+            ///   95th: 45_987
+            ///   75th: 13_262
+            write: 813_728 * constants::WEIGHT_REF_TIME_PER_NANOS,
         };
     }
 
