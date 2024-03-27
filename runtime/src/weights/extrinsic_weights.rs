@@ -1,5 +1,6 @@
+
 //! THIS FILE WAS AUTO-GENERATED USING THE SUBSTRATE BENCHMARK CLI VERSION 32.0.0
-//! DATE: 2024-02-19 (Y/M/D)
+//! DATE: 2024-03-27 (Y/M/D)
 //! HOSTNAME: `bgallois-ms7d43`, CPU: `12th Gen Intel(R) Core(TM) i3-12100F`
 //!
 //! SHORT-NAME: `extrinsic`, LONG-NAME: `ExtrinsicBase`, RUNTIME: `Development`
@@ -21,43 +22,43 @@ use sp_core::parameter_types;
 use sp_weights::{constants::WEIGHT_REF_TIME_PER_NANOS, Weight};
 
 parameter_types! {
-    /// Time to execute a NO-OP extrinsic, for example `System::remark`.
-    /// Calculated by multiplying the *Average* with `1.0` and adding `0`.
-    ///
-    /// Stats nanoseconds:
-    ///   Min, Max: 74_934, 83_810
-    ///   Average:  78_437
-    ///   Median:   78_718
-    ///   Std-Dev:  1947.26
-    ///
-    /// Percentiles nanoseconds:
-    ///   99th: 83_178
-    ///   95th: 81_782
-    ///   75th: 79_770
-    pub const ExtrinsicBaseWeight: Weight =
-        Weight::from_parts(WEIGHT_REF_TIME_PER_NANOS.saturating_mul(78_437), 0);
+	/// Time to execute a NO-OP extrinsic, for example `System::remark`.
+	/// Calculated by multiplying the *Average* with `1.0` and adding `0`.
+	///
+	/// Stats nanoseconds:
+	///   Min, Max: 76_607, 88_582
+	///   Average:  80_115
+	///   Median:   80_083
+	///   Std-Dev:  2342.59
+	///
+	/// Percentiles nanoseconds:
+	///   99th: 86_542
+	///   95th: 83_250
+	///   75th: 81_695
+	pub const ExtrinsicBaseWeight: Weight =
+		Weight::from_parts(WEIGHT_REF_TIME_PER_NANOS.saturating_mul(80_115), 0);
 }
 
 #[cfg(test)]
 mod test_weights {
-    use sp_weights::constants;
+	use sp_weights::constants;
 
-    /// Checks that the weight exists and is sane.
-    // NOTE: If this test fails but you are sure that the generated values are fine,
-    // you can delete it.
-    #[test]
-    fn sane() {
-        let w = super::ExtrinsicBaseWeight::get();
+	/// Checks that the weight exists and is sane.
+	// NOTE: If this test fails but you are sure that the generated values are fine,
+	// you can delete it.
+	#[test]
+	fn sane() {
+		let w = super::ExtrinsicBaseWeight::get();
 
-        // At least 10 µs.
-        assert!(
-            w.ref_time() >= 10u64 * constants::WEIGHT_REF_TIME_PER_MICROS,
-            "Weight should be at least 10 µs."
-        );
-        // At most 1 ms.
-        assert!(
-            w.ref_time() <= constants::WEIGHT_REF_TIME_PER_MILLIS,
-            "Weight should be at most 1 ms."
-        );
-    }
+		// At least 10 µs.
+		assert!(
+			w.ref_time() >= 10u64 * constants::WEIGHT_REF_TIME_PER_MICROS,
+			"Weight should be at least 10 µs."
+		);
+		// At most 1 ms.
+		assert!(
+			w.ref_time() <= constants::WEIGHT_REF_TIME_PER_MILLIS,
+			"Weight should be at most 1 ms."
+		);
+	}
 }

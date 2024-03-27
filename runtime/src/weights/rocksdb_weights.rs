@@ -1,5 +1,5 @@
 //! THIS FILE WAS AUTO-GENERATED USING THE SUBSTRATE BENCHMARK CLI VERSION 32.0.0
-//! DATE: 2024-02-19 (Y/M/D)
+//! DATE: 2024-03-27 (Y/M/D)
 //! HOSTNAME: `bgallois-ms7d43`, CPU: `12th Gen Intel(R) Core(TM) i3-12100F`
 //!
 //! DATABASE: `RocksDb`, RUNTIME: `Development`
@@ -32,31 +32,31 @@ pub mod constants {
             /// Calculated by multiplying the *Average* of all values with `2.0` and adding `0`.
             ///
             /// Stats nanoseconds:
-            ///   Min, Max: 1_251, 795_568
-            ///   Average:  25_455
-            ///   Median:   1_786
-            ///   Std-Dev:  134064.4
+            ///   Min, Max: 1_309, 809_058
+            ///   Average:  25_933
+            ///   Median:   1_974
+            ///   Std-Dev:  136329.98
             ///
             /// Percentiles nanoseconds:
-            ///   99th: 795_568
-            ///   95th: 8_200
-            ///   75th: 2_304
-            read: 50_910 * constants::WEIGHT_REF_TIME_PER_NANOS,
+            ///   99th: 809_058
+            ///   95th: 8_763
+            ///   75th: 2_425
+            read: 51_866 * constants::WEIGHT_REF_TIME_PER_NANOS,
 
             /// Time to write one storage item.
             /// Calculated by multiplying the *Average* of all values with `2.0` and adding `0`.
             ///
             /// Stats nanoseconds:
-            ///   Min, Max: 6_204, 13_455_084
-            ///   Average:  406_864
-            ///   Median:   9_679
-            ///   Std-Dev:  2271413.08
+            ///   Min, Max: 5_600, 13_617_170
+            ///   Average:  411_433
+            ///   Median:   9_715
+            ///   Std-Dev:  2298831.13
             ///
             /// Percentiles nanoseconds:
-            ///   99th: 13_455_084
-            ///   95th: 45_987
-            ///   75th: 13_262
-            write: 813_728 * constants::WEIGHT_REF_TIME_PER_NANOS,
+            ///   99th: 13_617_170
+            ///   95th: 40_062
+            ///   75th: 13_655
+            write: 822_866 * constants::WEIGHT_REF_TIME_PER_NANOS,
         };
     }
 

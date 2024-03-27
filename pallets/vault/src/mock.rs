@@ -46,6 +46,11 @@ impl frame_system::Config for Test {
     type OnSetCode = ();
     type MaxConsumers = frame_support::traits::ConstU32<16>;
     type RuntimeTask = ();
+    type SingleBlockMigrations = ();
+    type PostInherents = ();
+    type PostTransactions = ();
+    type PreInherents = ();
+    type MultiBlockMigrator = ();
 }
 
 impl pallet_balances::Config for Test {
@@ -61,7 +66,6 @@ impl pallet_balances::Config for Test {
     type FreezeIdentifier = ();
     type MaxFreezes = ();
     type RuntimeHoldReason = ();
-    type MaxHolds = ();
     type RuntimeFreezeReason = ();
 }
 
