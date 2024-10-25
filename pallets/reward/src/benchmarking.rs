@@ -1,9 +1,7 @@
-#![cfg(feature = "runtime-benchmarks")]
 use super::*;
 
 use frame_benchmarking::v2::*;
-use frame_support::pallet_prelude::Weight;
-use frame_support::traits::OnIdle;
+use frame_support::{pallet_prelude::Weight, traits::OnIdle};
 use frame_system::{pallet_prelude::BlockNumberFor, RawOrigin};
 
 #[cfg(test)]

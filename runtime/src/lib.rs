@@ -14,28 +14,30 @@ use frame_benchmarking::{BenchmarkBatch, BenchmarkList};
 use frame_support::traits::TrackedStorageKey;
 
 use crate::weights::extrinsic_weights::ExtrinsicBaseWeight;
-use frame_support::weights::WeightToFee;
-use frame_support::weights::WeightToFeeCoefficient;
-use frame_support::weights::WeightToFeeCoefficients;
-use frame_support::weights::WeightToFeePolynomial;
-use frame_support::PalletId;
-use frame_system::{EnsureRoot, EnsureRootWithSuccess};
-use pallet_balances::NegativeImbalance;
+use frame_support::{
+    traits::{fungible::Balanced, Imbalance},
+    weights::{
+        WeightToFee, WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
+    },
+    PalletId,
+};
+use frame_system::EnsureRoot;
 use pallet_grandpa::AuthorityId as GrandpaId;
 use smallvec::smallvec;
 use sp_api::impl_runtime_apis;
-use sp_arithmetic::traits::{BaseArithmetic, Unsigned};
-use sp_arithmetic::MultiplyRational;
+use sp_arithmetic::{
+    traits::{BaseArithmetic, Unsigned},
+    MultiplyRational,
+};
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
-use sp_runtime::SaturatedConversion;
 use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
     traits::{
         AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, NumberFor, One, Verify,
     },
     transaction_validity::{TransactionSource, TransactionValidity},
-    ApplyExtrinsicResult, MultiSignature,
+    ApplyExtrinsicResult, MultiSignature, SaturatedConversion,
 };
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -45,8 +47,7 @@ use sp_version::RuntimeVersion;
 pub mod weights;
 
 // A few exports that help ease life for downstream crates.
-use frame_support::weights::constants::RocksDbWeight;
-use frame_support::weights::constants::WEIGHT_REF_TIME_PER_SECOND;
+use frame_support::weights::constants::{RocksDbWeight, WEIGHT_REF_TIME_PER_SECOND};
 pub use frame_support::{
     construct_runtime, parameter_types,
     traits::{
@@ -59,7 +60,7 @@ pub use frame_support::{
 pub use frame_system::Call as SystemCall;
 pub use pallet_balances::Call as BalancesCall;
 pub use pallet_timestamp::Call as TimestampCall;
-use pallet_transaction_payment::{ConstFeeMultiplier, CurrencyAdapter, Multiplier};
+use pallet_transaction_payment::{ConstFeeMultiplier, FungibleAdapter, Multiplier};
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
@@ -174,85 +175,84 @@ parameter_types! {
 // Configure FRAME pallets to include in runtime.
 
 impl frame_system::Config for Runtime {
+    /// The data to be stored in an account.
+    type AccountData = pallet_balances::AccountData<Balance>;
+    /// The identifier used to distinguish between accounts.
+    type AccountId = AccountId;
     /// The basic call filter to use in dispatchable.
     type BaseCallFilter = frame_support::traits::Everything;
     /// The block type for the runtime.
     type Block = Block;
-    /// Block & extrinsics weights: base values and limits.
-    type BlockWeights = BlockWeights;
+    /// Maximum number of block number to block hash mappings to keep (oldest pruned first).
+    type BlockHashCount = BlockHashCount;
     /// The maximum length of a block (in bytes).
     type BlockLength = BlockLength;
-    /// The identifier used to distinguish between accounts.
-    type AccountId = AccountId;
-    /// The aggregated dispatch type that is available for extrinsics.
-    type RuntimeCall = RuntimeCall;
-    /// The lookup mechanism to get account ID from whatever is passed in dispatchers.
-    type Lookup = AccountIdLookup<AccountId, ()>;
-    /// The type for storing how many extrinsics an account has signed.
-    type Nonce = Nonce;
+    /// Block & extrinsics weights: base values and limits.
+    type BlockWeights = BlockWeights;
+    /// The weight of database operations that the runtime can invoke.
+    type DbWeight = RocksDbWeight;
     /// The type for hashing blocks and tries.
     type Hash = Hash;
     /// The hashing algorithm used.
     type Hashing = BlakeTwo256;
-    /// The ubiquitous event type.
-    type RuntimeEvent = RuntimeEvent;
-    /// The ubiquitous origin type.
-    type RuntimeOrigin = RuntimeOrigin;
-    /// Maximum number of block number to block hash mappings to keep (oldest pruned first).
-    type BlockHashCount = BlockHashCount;
-    /// The weight of database operations that the runtime can invoke.
-    type DbWeight = RocksDbWeight;
-    /// Version of the runtime.
-    type Version = Version;
+    /// The lookup mechanism to get account ID from whatever is passed in dispatchers.
+    type Lookup = AccountIdLookup<AccountId, ()>;
+    type MaxConsumers = frame_support::traits::ConstU32<16>;
+    type MultiBlockMigrator = ();
+    /// The type for storing how many extrinsics an account has signed.
+    type Nonce = Nonce;
+    /// What to do if an account is fully reaped from the system.
+    type OnKilledAccount = ();
+    /// What to do if a new account is created.
+    type OnNewAccount = ();
+    /// The set code logic, just the default since we're not a parachain.
+    type OnSetCode = ();
     /// Converts a module to the index of the module in `construct_runtime!`.
     ///
     /// This type is being generated by `construct_runtime!`.
     type PalletInfo = PalletInfo;
-    /// What to do if a new account is created.
-    type OnNewAccount = ();
-    /// What to do if an account is fully reaped from the system.
-    type OnKilledAccount = ();
-    /// The data to be stored in an account.
-    type AccountData = pallet_balances::AccountData<Balance>;
-    /// Weight information for the extrinsics of this pallet.
-    type SystemWeightInfo = weights::frame_system::WeightInfo<Runtime>;
-    /// This is used as an identifier of the chain. 42 is the generic substrate prefix.
-    type SS58Prefix = SS58Prefix;
-    /// The set code logic, just the default since we're not a parachain.
-    type OnSetCode = ();
-    type MaxConsumers = frame_support::traits::ConstU32<16>;
-    type RuntimeTask = ();
-    type SingleBlockMigrations = ();
     type PostInherents = ();
     type PostTransactions = ();
     type PreInherents = ();
-    type MultiBlockMigrator = ();
+    /// The aggregated dispatch type that is available for extrinsics.
+    type RuntimeCall = RuntimeCall;
+    /// The ubiquitous event type.
+    type RuntimeEvent = RuntimeEvent;
+    /// The ubiquitous origin type.
+    type RuntimeOrigin = RuntimeOrigin;
+    type RuntimeTask = ();
+    /// This is used as an identifier of the chain. 42 is the generic substrate prefix.
+    type SS58Prefix = SS58Prefix;
+    type SingleBlockMigrations = ();
+    /// Weight information for the extrinsics of this pallet.
+    type SystemWeightInfo = weights::frame_system::WeightInfo<Runtime>;
+    /// Version of the runtime.
+    type Version = Version;
 }
 
 impl pallet_aura::Config for Runtime {
+    type AllowMultipleBlocksPerSlot = ConstBool<false>;
     type AuthorityId = AuraId;
     type DisabledValidators = ();
     type MaxAuthorities = ConstU32<32>;
-    type AllowMultipleBlocksPerSlot = ConstBool<false>;
+    type SlotDuration = pallet_aura::MinimumPeriodTimesTwo<Runtime>;
 }
 
 impl pallet_grandpa::Config for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-
-    type WeightInfo = ();
-    type MaxAuthorities = ConstU32<32>;
-    type MaxSetIdSessionEntries = ConstU64<0>;
-
-    type KeyOwnerProof = sp_core::Void;
     type EquivocationReportSystem = ();
+    type KeyOwnerProof = sp_core::Void;
+    type MaxAuthorities = ConstU32<32>;
     type MaxNominators = ConstU32<32>;
+    type MaxSetIdSessionEntries = ConstU64<0>;
+    type RuntimeEvent = RuntimeEvent;
+    type WeightInfo = ();
 }
 
 impl pallet_timestamp::Config for Runtime {
+    type MinimumPeriod = ConstU64<{ SLOT_DURATION / 2 }>;
     /// A timestamp: milliseconds since the unix epoch.
     type Moment = u64;
     type OnTimestampSet = Aura;
-    type MinimumPeriod = ConstU64<{ SLOT_DURATION / 2 }>;
     type WeightInfo = weights::pallet_timestamp::WeightInfo<Runtime>;
 }
 
@@ -263,28 +263,28 @@ pub struct HandleDust;
 type CreditOf = frame_support::traits::tokens::fungible::Credit<AccountId, Balances>;
 impl frame_support::traits::OnUnbalanced<CreditOf> for HandleDust {
     fn on_nonzero_unbalanced(amount: CreditOf) {
-        use frame_support::traits::{Currency as _, Imbalance as _};
-        let imbalance = NegativeImbalance::new(amount.peek());
-        Balances::resolve_creating(&Treasury::account_id(), imbalance);
+        let _ = Balances::deposit(
+            &Treasury::account_id(),
+            amount.peek(),
+            frame_support::traits::tokens::Precision::Exact,
+        );
     }
 }
 
 impl pallet_balances::Config for Runtime {
+    type AccountStore = System;
+    type Balance = Balance;
+    type DustRemoval = ();
+    type ExistentialDeposit = ConstU128<EXISTENTIAL_DEPOSIT>;
+    type FreezeIdentifier = ();
+    type MaxFreezes = ();
     type MaxLocks = ConstU32<50>;
     type MaxReserves = ();
     type ReserveIdentifier = [u8; 8];
-    /// The type for recording an account's balance.
-    type Balance = Balance;
-    /// The ubiquitous event type.
     type RuntimeEvent = RuntimeEvent;
-    type DustRemoval = HandleDust;
-    type ExistentialDeposit = ConstU128<EXISTENTIAL_DEPOSIT>;
-    type AccountStore = System;
+    type RuntimeFreezeReason = RuntimeHoldReason;
+    type RuntimeHoldReason = RuntimeHoldReason;
     type WeightInfo = weights::pallet_balances::WeightInfo<Runtime>;
-    type FreezeIdentifier = ();
-    type MaxFreezes = ();
-    type RuntimeHoldReason = ();
-    type RuntimeFreezeReason = ();
 }
 
 parameter_types! {
@@ -297,6 +297,7 @@ where
     T: BaseArithmetic + From<u32> + Copy + Unsigned,
 {
     type Balance = T;
+
     fn weight_to_fee(length_in_bytes: &Weight) -> Self::Balance {
         Self::Balance::saturated_from(length_in_bytes.ref_time() / 100u64)
     }
@@ -322,17 +323,17 @@ where
 }
 
 impl pallet_transaction_payment::Config for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-    type OnChargeTransaction = CurrencyAdapter<Balances, Treasury>;
-    type OperationalFeeMultiplier = ConstU8<20>;
-    type WeightToFee = LengthToFeeImpl<Balance>;
-    type LengthToFee = WeightToFeeImpl<Balance>;
     type FeeMultiplierUpdate = ConstFeeMultiplier<FeeMultiplier>;
+    type LengthToFee = WeightToFeeImpl<Balance>;
+    type OnChargeTransaction = FungibleAdapter<Balances, HandleDust>;
+    type OperationalFeeMultiplier = ConstU8<20>;
+    type RuntimeEvent = RuntimeEvent;
+    type WeightToFee = LengthToFeeImpl<Balance>;
 }
 
 impl pallet_sudo::Config for Runtime {
-    type RuntimeEvent = RuntimeEvent;
     type RuntimeCall = RuntimeCall;
+    type RuntimeEvent = RuntimeEvent;
     type WeightInfo = weights::pallet_sudo::WeightInfo<Runtime>;
 }
 
@@ -357,29 +358,30 @@ where
     }
 }
 impl pallet_vault::Config for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-    type WeightInfo = weights::pallet_vault::WeightInfo<Runtime>;
-    type ElementId = u64;
-    type ElementHash = sp_core::H256;
-    type RewardHandler = RewardHandler<Runtime>;
     type AccountIdOf = AccountIdOf<Runtime>;
     type Currency = Balances;
+    type ElementHash = sp_core::H256;
+    type ElementId = u64;
     type FeePrice = frame_support::traits::ConstU128<10_000_000_000_000>;
     type OnFee = Treasury;
+    type RewardHandler = RewardHandler<Runtime>;
+    type RuntimeEvent = RuntimeEvent;
+    type WeightInfo = weights::pallet_vault::WeightInfo<Runtime>;
 }
 
 impl pallet_reward::Config for Runtime {
+    type Currency = Balances;
+    // ~1 minute
+    type Dividend = ConstU128<100_000_000_000>;
+    type ReevaluationPeriod = ConstU32<10>;
     type RuntimeEvent = RuntimeEvent;
     type WeightInfo = weights::pallet_reward::WeightInfo<Runtime>;
-    type Currency = Balances;
-    type ReevaluationPeriod = ConstU32<10>; // ~1 minute
-    type Dividend = ConstU128<100_000_000_000>;
 }
 
 impl pallet_utility::Config for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-    type RuntimeCall = RuntimeCall;
     type PalletsOrigin = OriginCaller;
+    type RuntimeCall = RuntimeCall;
+    type RuntimeEvent = RuntimeEvent;
     type WeightInfo = weights::pallet_utility::WeightInfo<Runtime>;
 }
 
@@ -389,37 +391,33 @@ parameter_types! {
     pub const SpendPeriod: BlockNumber = DAYS;
     pub const TreasuryPalletId: PalletId = PalletId(*b"py/trsry");
     pub const MaxApprovals: u32 = 100;
-    pub const MaxBalance: Balance = Balance::max_value();
+    pub const MaxBalance: Balance = Balance::MAX;
 }
 
 parameter_types! {
 pub TreasuryAccount: AccountId = Treasury::account_id();
+pub const Burn: Permill = Permill::zero();
         }
 impl pallet_treasury::Config for Runtime {
-    type PalletId = TreasuryPalletId;
-    type Currency = Balances;
-    type ApproveOrigin = EnsureRoot<AccountId>;
-    type RejectOrigin = EnsureRoot<AccountId>;
-    type RuntimeEvent = RuntimeEvent;
-    type OnSlash = Treasury;
-    type ProposalBond = ProposalBond;
-    type ProposalBondMinimum = ProposalBondMinimum;
-    type ProposalBondMaximum = MaxBalance;
-    type SpendPeriod = SpendPeriod;
-    type Burn = ();
-    type BurnDestination = ();
-    type SpendFunds = ();
-    type WeightInfo = (); // weights::pallet_treasury::WeightInfo<Runtime>;
-    type MaxApprovals = MaxApprovals;
-    type SpendOrigin = EnsureRootWithSuccess<AccountId, MaxBalance>;
     type AssetKind = ();
-    type Beneficiary = AccountId;
-    type BeneficiaryLookup = AccountIdLookup<AccountId, ()>;
-    type Paymaster = frame_support::traits::tokens::pay::PayFromAccount<Balances, TreasuryAccount>;
     type BalanceConverter = frame_support::traits::tokens::UnityAssetBalanceConversion;
-    type PayoutPeriod = sp_core::ConstU32<10>;
     #[cfg(feature = "runtime-benchmarks")]
     type BenchmarkHelper = ();
+    type Beneficiary = AccountId;
+    type BeneficiaryLookup = AccountIdLookup<AccountId, ()>;
+    type Burn = Burn;
+    type BurnDestination = ();
+    type Currency = Balances;
+    type MaxApprovals = MaxApprovals;
+    type PalletId = TreasuryPalletId;
+    type Paymaster = frame_support::traits::tokens::pay::PayFromAccount<Balances, TreasuryAccount>;
+    type PayoutPeriod = sp_core::ConstU32<10>;
+    type RejectOrigin = EnsureRoot<AccountId>;
+    type RuntimeEvent = RuntimeEvent;
+    type SpendFunds = ();
+    type SpendOrigin = frame_support::traits::NeverEnsureOrigin<u128>;
+    type SpendPeriod = SpendPeriod;
+    type WeightInfo = weights::pallet_treasury::WeightInfo<Runtime>;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -485,7 +483,7 @@ mod benches {
         [pallet_vault, Vault]
         [pallet_reward, Reward]
         [pallet_utility, Utility]
-        //[pallet_treasury, Treasury] //TODO polkadot-sdk benchmarks are incorrect
+        [pallet_treasury, Treasury]
     );
 }
 
@@ -561,7 +559,7 @@ impl_runtime_apis! {
         }
 
         fn authorities() -> Vec<AuraId> {
-            Aura::authorities().into_inner()
+            pallet_aura::Authorities::<Runtime>::get().into_inner()
         }
     }
 
@@ -680,12 +678,13 @@ impl_runtime_apis! {
             config: frame_benchmarking::BenchmarkConfig
         ) -> Result<Vec<frame_benchmarking::BenchmarkBatch>, sp_runtime::RuntimeString> {
             use frame_benchmarking::{baseline, Benchmarking};
-
             use frame_system_benchmarking::Pallet as SystemBench;
-            //use baseline::Pallet as BaselineBench;
 
+    #[allow(non_local_definitions)]
+            {
             impl frame_system_benchmarking::Config for Runtime {}
             impl baseline::Config for Runtime {}
+            }
 
             use frame_support::traits::WhitelistedStorageKeys;
             let whitelist: Vec<TrackedStorageKey> = AllPalletsWithSystem::whitelisted_storage_keys();
@@ -717,6 +716,20 @@ impl_runtime_apis! {
             // NOTE: intentional unwrap: we don't want to propagate the error backwards, and want to
             // have a backtrace here.
             Executive::try_execute_block(block, state_root_check, signature_check, select).expect("execute-block failed")
+        }
+    }
+
+impl sp_genesis_builder::GenesisBuilder<Block> for Runtime {
+        fn build_state(config: Vec<u8>) -> sp_genesis_builder::Result {
+            frame_support::genesis_builder_helper::build_state::<RuntimeGenesisConfig>(config)
+        }
+
+        fn get_preset(id: &Option<sp_genesis_builder::PresetId>) -> Option<Vec<u8>> {
+            frame_support::genesis_builder_helper::get_preset::<RuntimeGenesisConfig>(id, |_| None)
+        }
+
+        fn preset_names() -> Vec<sp_genesis_builder::PresetId> {
+            vec![]
         }
     }
 }

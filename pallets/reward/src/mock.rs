@@ -23,77 +23,77 @@ frame_support::construct_runtime!(
 );
 
 impl timestamp::Config for Test {
+    type MinimumPeriod = ConstU64<0>;
     type Moment = u64;
     type OnTimestampSet = ();
-    type MinimumPeriod = ConstU64<0>;
     type WeightInfo = ();
 }
 
 impl frame_system::Config for Test {
+    type AccountData = pallet_balances::AccountData<Balance>;
+    type AccountId = u64;
     type BaseCallFilter = frame_support::traits::Everything;
-    type BlockWeights = ();
+    type Block = Block;
+    type BlockHashCount = ConstU64<250>;
     type BlockLength = ();
+    type BlockWeights = ();
     type DbWeight = ();
-    type RuntimeOrigin = RuntimeOrigin;
-    type RuntimeCall = RuntimeCall;
-    type Nonce = u64;
     type Hash = H256;
     type Hashing = BlakeTwo256;
-    type AccountId = u64;
     type Lookup = IdentityLookup<Self::AccountId>;
-    type Block = Block;
-    type RuntimeEvent = RuntimeEvent;
-    type BlockHashCount = ConstU64<250>;
-    type Version = ();
-    type PalletInfo = PalletInfo;
-    type AccountData = pallet_balances::AccountData<Balance>;
-    type OnNewAccount = ();
-    type OnKilledAccount = ();
-    type SystemWeightInfo = ();
-    type SS58Prefix = ConstU16<42>;
-    type OnSetCode = ();
     type MaxConsumers = frame_support::traits::ConstU32<16>;
-    type RuntimeTask = ();
-    type SingleBlockMigrations = ();
+    type MultiBlockMigrator = ();
+    type Nonce = u64;
+    type OnKilledAccount = ();
+    type OnNewAccount = ();
+    type OnSetCode = ();
+    type PalletInfo = PalletInfo;
     type PostInherents = ();
     type PostTransactions = ();
     type PreInherents = ();
-    type MultiBlockMigrator = ();
+    type RuntimeCall = RuntimeCall;
+    type RuntimeEvent = RuntimeEvent;
+    type RuntimeOrigin = RuntimeOrigin;
+    type RuntimeTask = ();
+    type SS58Prefix = ConstU16<42>;
+    type SingleBlockMigrations = ();
+    type SystemWeightInfo = ();
+    type Version = ();
 }
 
 impl pallet_balances::Config for Test {
+    type AccountStore = System;
     type Balance = Balance;
     type DustRemoval = ();
     type ExistentialDeposit = ConstU32<10>;
-    type AccountStore = System;
-    type WeightInfo = ();
+    type FreezeIdentifier = ();
+    type MaxFreezes = ();
     type MaxLocks = ConstU32<50>;
     type MaxReserves = ();
     type ReserveIdentifier = [u8; 8];
     type RuntimeEvent = RuntimeEvent;
-    type FreezeIdentifier = ();
-    type MaxFreezes = ();
-    type RuntimeHoldReason = ();
     type RuntimeFreezeReason = ();
+    type RuntimeHoldReason = ();
+    type WeightInfo = ();
 }
 impl pallet_vault::Config for Test {
-    type RuntimeEvent = RuntimeEvent;
-    type WeightInfo = ();
-    type ElementId = u64;
-    type ElementHash = u8;
-    type RewardHandler = ();
     type AccountIdOf = ();
     type Currency = Balances;
+    type ElementHash = u8;
+    type ElementId = u64;
     type FeePrice = frame_support::traits::ConstU32<1>;
     type OnFee = ();
+    type RewardHandler = ();
+    type RuntimeEvent = RuntimeEvent;
+    type WeightInfo = ();
 }
 
 impl pallet_reward::Config for Test {
+    type Currency = Balances;
+    type Dividend = ConstU32<1>;
+    type ReevaluationPeriod = ConstU32<10>;
     type RuntimeEvent = RuntimeEvent;
     type WeightInfo = ();
-    type Currency = Balances;
-    type ReevaluationPeriod = ConstU32<10>;
-    type Dividend = ConstU32<1>;
 }
 
 // Build genesis storage according to the mock runtime.

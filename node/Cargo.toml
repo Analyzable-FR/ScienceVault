@@ -22,6 +22,7 @@ frame-benchmarking = { workspace = true }
 frame-benchmarking-cli = { workspace = true }
 frame-system = { workspace = true }
 futures = { workspace = true, features = ["thread-pool"] }
+serde_json = { workspace = true, default-features = true }
 jsonrpsee = { workspace = true, features = ["server"] }
 pallet-transaction-payment = { workspace = true }
 pallet-transaction-payment-rpc = { workspace = true }
@@ -54,7 +55,6 @@ sp-keyring = { workspace = true }
 sp-runtime = { workspace = true }
 sp-timestamp = { workspace = true }
 substrate-frame-rpc-system = { workspace = true }
-try-runtime-cli = { workspace = true }
 
 [build-dependencies]
 substrate-build-script-utils = { workspace = true }
@@ -76,7 +76,6 @@ try-runtime = [
 	"pallet-treasury/try-runtime",
 	"science-vault-runtime/try-runtime",
 	"sp-runtime/try-runtime",
-	"try-runtime-cli/try-runtime",
 ]
 std = [
 	"clap/std",

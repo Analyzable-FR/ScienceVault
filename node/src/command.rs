@@ -6,8 +6,9 @@ use crate::{
 };
 use frame_benchmarking_cli::{BenchmarkCmd, ExtrinsicFactory, SUBSTRATE_REFERENCE_HARDWARE};
 use sc_cli::SubstrateCli;
+use sc_network::config::NetworkBackendType::Libp2p;
 use sc_service::PartialComponents;
-use science_vault_runtime::{Block, EXISTENTIAL_DEPOSIT};
+use science_vault_runtime::{opaque::Block, EXISTENTIAL_DEPOSIT};
 use sp_keyring::Sr25519Keyring;
 
 #[cfg(feature = "try-runtime")]
@@ -136,12 +137,14 @@ pub fn run() -> sc_cli::Result<()> {
                         if !cfg!(feature = "runtime-benchmarks") {
                             return Err(
                                 "Runtime benchmarking wasn't enabled when building the node. \
-							You can enable it with `--features runtime-benchmarks`."
+You can enable it with `--features runtime-benchmarks`."
                                     .into(),
                             );
                         }
 
-                        cmd.run::<sp_runtime::traits::HashingFor<Block>, ()>(config)
+                        cmd.run_with_spec::<sp_runtime::traits::HashingFor<Block>, ()>(Some(
+                            config.chain_spec,
+                        ))
                     }
                     BenchmarkCmd::Block(cmd) => {
                         let PartialComponents { client, .. } = service::new_partial(&config)?;
@@ -219,7 +222,7 @@ pub fn run() -> sc_cli::Result<()> {
         }
         #[cfg(not(feature = "try-runtime"))]
         Some(Subcommand::TryRuntime) => Err("TryRuntime wasn't enabled when building the node. \
-				You can enable it with `--features try-runtime`."
+You can enable it with `--features try-runtime`."
             .into()),
         Some(Subcommand::ChainInfo(cmd)) => {
             let runner = cli.create_runner(cmd)?;
@@ -228,7 +231,19 @@ pub fn run() -> sc_cli::Result<()> {
         None => {
             let runner = cli.create_runner(&cli.run)?;
             runner.run_node_until_exit(|config| async move {
-                service::new_full(config).map_err(sc_cli::Error::Service)
+                match config.network.network_backend {
+                    Libp2p => service::new_full::<
+                        sc_network::NetworkWorker<
+                            Block,
+                            <Block as sp_runtime::traits::Block>::Hash,
+                        >,
+                    >(config)
+                    .map_err(sc_cli::Error::Service),
+                    sc_network::config::NetworkBackendType::Litep2p => {
+                        service::new_full::<sc_network::Litep2pNetworkBackend>(config)
+                            .map_err(sc_cli::Error::Service)
+                    }
+                }
             })
         }
     }

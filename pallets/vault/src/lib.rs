@@ -173,6 +173,7 @@ pub mod pallet {
                 return Err(Error::<T>::AlreadyInVault.into());
             }
         }
+
         #[pallet::call_index(1)]
         #[pallet::weight(<T as pallet::Config>::WeightInfo::set_element_source())]
         pub fn set_element_source(
@@ -200,6 +201,7 @@ pub mod pallet {
                 }
             })
         }
+
         #[pallet::call_index(2)]
         #[pallet::weight(<T as pallet::Config>::WeightInfo::delete_element())]
         pub fn delete_element(origin: OriginFor<T>, element: T::ElementHash) -> DispatchResult {

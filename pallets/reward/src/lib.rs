@@ -179,6 +179,7 @@ pub mod pallet {
                 }
             })
         }
+
         #[pallet::call_index(1)]
         #[pallet::weight(<T as pallet::Config>::WeightInfo::punish())]
         pub fn punish(origin: OriginFor<T>, account: T::AccountId, amount: u128) -> DispatchResult {
@@ -211,6 +212,7 @@ pub mod pallet {
                 }
             })
         }
+
         #[pallet::call_index(2)]
         #[pallet::weight(<T as pallet::Config>::WeightInfo::slash())]
         pub fn slash(origin: OriginFor<T>, account: T::AccountId, amount: u128) -> DispatchResult {
@@ -231,6 +233,7 @@ pub mod pallet {
                 }
             })
         }
+
         #[pallet::call_index(3)]
         #[pallet::weight(<T as pallet::Config>::WeightInfo::slash())]
         pub fn evaluate_reputation(origin: OriginFor<T>, account: T::AccountId) -> DispatchResult {
@@ -271,10 +274,12 @@ pub mod pallet {
                 }
             });
         }
+
         fn compute_reputation(reputation: &Reputation<BlockNumberFor<T>>) -> Perbill {
             let raw_reputation = reputation.score * reputation.contribution;
             Perbill::from_rational(raw_reputation, MaxRawReputation::<T>::get() + 1)
         }
+
         fn do_evaluate_reputation(account: &T::AccountId) -> DispatchResult {
             Reputations::<T>::try_mutate_exists(account, |reputation| {
                 if let Some(ref mut reputation) = reputation {
@@ -291,6 +296,7 @@ pub mod pallet {
                 }
             })
         }
+
         pub fn process_evaluation_queue(remaining_weight: Weight) -> Weight {
             EvaluationQueue::<T>::put(AccountQueue::<T>::get());
             MaxRawReputation::<T>::put(0);
