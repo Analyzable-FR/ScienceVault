@@ -5,7 +5,7 @@ pub use pallet::*;
 use codec::{Decode, Encode, MaxEncodedLen};
 use frame_support::{
     pallet_prelude::TypeInfo,
-    traits::{BuildGenesisConfig, Currency},
+    traits::{fungible, tokens::fungible::Mutate, BuildGenesisConfig},
 };
 #[cfg(feature = "std")]
 use sp_runtime::serde::{Deserialize, Serialize};
@@ -13,6 +13,7 @@ use sp_runtime::{
     traits::{BlockNumberProvider, One, Zero},
     Perbill, Saturating,
 };
+
 #[cfg(test)]
 mod mock;
 
@@ -24,8 +25,8 @@ mod benchmarking;
 pub mod weights;
 pub use weights::*;
 
-pub type BalanceOf<T> =
-    <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+pub type AccountIdOf<T> = <T as frame_system::Config>::AccountId;
+pub type BalanceOf<T> = <<T as Config>::Currency as fungible::Inspect<AccountIdOf<T>>>::Balance;
 
 #[cfg_attr(feature = "std", derive(Debug, Deserialize, Serialize))]
 #[derive(Encode, Decode, Clone, PartialEq, Eq, TypeInfo, MaxEncodedLen)]
@@ -71,7 +72,7 @@ pub mod pallet {
         type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
         /// Type representing the weight of this pallet
         type WeightInfo: WeightInfo;
-        type Currency: Currency<Self::AccountId>;
+        type Currency: Mutate<Self::AccountId>;
         #[pallet::constant]
         type ReevaluationPeriod: Get<u32>;
         #[pallet::constant]
@@ -311,7 +312,7 @@ pub mod pallet {
                 while total_weight.any_lt(remaining_weight.saturating_sub(overhead)) {
                     if let Some(account) = queue.pop() {
                         let _ = Self::do_evaluate_reputation(&account);
-                        let _ = T::Currency::deposit_into_existing(
+                        let _ = T::Currency::mint_into(
                             &account,
                             Reputations::<T>::get(&account)
                                 .map_or_else(Perbill::zero, |account| account.reputation)

@@ -8,7 +8,12 @@ use codec::{Codec, Decode, Encode, MaxEncodedLen};
 use core::fmt::Debug;
 use frame_support::{
     pallet_prelude::TypeInfo,
-    traits::{Currency, ExistenceRequirement, OnUnbalanced, ReservableCurrency, WithdrawReasons},
+    traits::{
+        fungible,
+        fungible::{hold, Balanced, Credit, Mutate},
+        tokens::{Fortitude, Precision, Preservation},
+        OnUnbalanced,
+    },
     BoundedVec,
 };
 #[cfg(feature = "std")]
@@ -29,6 +34,9 @@ pub use weights::*;
 pub const MAX_SOURCES: u32 = 100;
 pub const MAX_SOURCE_LEN: u32 = 100;
 pub const MAX_ELEMENTS: u32 = 100_000;
+
+pub type AccountIdOf<T> = <T as frame_system::Config>::AccountId;
+pub type BalanceOf<T> = <<T as Config>::Currency as fungible::Inspect<AccountIdOf<T>>>::Balance;
 
 #[cfg_attr(feature = "std", derive(Debug, Deserialize, Serialize))]
 #[derive(Encode, Decode, Clone, PartialEq, Eq, TypeInfo, MaxEncodedLen)]
@@ -71,12 +79,10 @@ pub mod pallet {
         type RewardHandler: Reward<Self::AccountId>;
         /// Type representing the convertion between an elementHash and an accountId
         type AccountIdOf: Convert<Self::ElementHash, Option<Self::AccountId>>;
-        type Currency: ReservableCurrency<Self::AccountId>;
+        type Currency: Mutate<Self::AccountId> + hold::Balanced<Self::AccountId>;
         #[pallet::constant]
-        type FeePrice: Get<
-            <Self::Currency as frame_support::traits::Currency<Self::AccountId>>::Balance,
-        >;
-        type OnFee: OnUnbalanced<<<Self as Config>::Currency as Currency<<Self as frame_system::Config>::AccountId,>>::NegativeImbalance>;
+        type FeePrice: Get<BalanceOf<Self>>;
+        type OnFee: OnUnbalanced<Credit<Self::AccountId, Self::Currency>>;
     }
 
     // Map vault element id to element hash.
@@ -142,8 +148,9 @@ pub mod pallet {
                 T::Currency::withdraw(
                     &who,
                     T::FeePrice::get(),
-                    WithdrawReasons::FEE,
-                    ExistenceRequirement::KeepAlive,
+                    Precision::Exact,
+                    Preservation::Preserve,
+                    Fortitude::Force,
                 )
                 .map(T::OnFee::on_unbalanced)?;
                 let element_id = NextVaultElementId::<T>::get();

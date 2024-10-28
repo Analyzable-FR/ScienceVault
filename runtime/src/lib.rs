@@ -363,7 +363,7 @@ impl pallet_vault::Config for Runtime {
     type ElementHash = sp_core::H256;
     type ElementId = u64;
     type FeePrice = frame_support::traits::ConstU128<10_000_000_000_000>;
-    type OnFee = Treasury;
+    type OnFee = HandleDust;
     type RewardHandler = RewardHandler<Runtime>;
     type RuntimeEvent = RuntimeEvent;
     type WeightInfo = weights::pallet_vault::WeightInfo<Runtime>;
