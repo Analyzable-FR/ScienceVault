@@ -1,12 +1,14 @@
 use crate::{mock::*, Error, Event};
 use frame_support::{
-    assert_noop, assert_ok, pallet_prelude::ConstU32, testing_prelude::bounded_vec, BoundedVec,
+    assert_noop, assert_ok, pallet_prelude::ConstU32, testing_prelude::bounded_vec,
+    traits::fungible::Mutate, BoundedVec,
 };
 use sp_runtime::traits::BadOrigin;
 
 #[test]
 fn insert_value() {
     new_test_ext().execute_with(|| {
+        Balances::set_balance(&1, 1000);
         // Go past genesis block so events get deposited
         System::set_block_number(1);
         assert_ok!(VaultModule::add_element(RuntimeOrigin::signed(1), 42));
@@ -38,6 +40,7 @@ fn insert_value() {
 #[test]
 fn noop_insert_value() {
     new_test_ext().execute_with(|| {
+        Balances::set_balance(&1, 1000);
         // Go past genesis block so events get deposited
         System::set_block_number(1);
         assert_ok!(VaultModule::add_element(RuntimeOrigin::signed(1), 42));
@@ -64,6 +67,7 @@ fn noop_insert_value() {
 #[test]
 fn insert_source() {
     new_test_ext().execute_with(|| {
+        Balances::set_balance(&1, 1000);
         // Go past genesis block so events get deposited
         System::set_block_number(1);
         assert_ok!(VaultModule::add_element(RuntimeOrigin::signed(1), 42));
@@ -96,6 +100,7 @@ fn insert_source() {
 #[test]
 fn noop_insert_source() {
     new_test_ext().execute_with(|| {
+        Balances::set_balance(&1, 1000);
         // Go past genesis block so events get deposited
         System::set_block_number(1);
         let source: BoundedVec<u8, ConstU32<100>> = bounded_vec![0u8; 32];
@@ -136,6 +141,7 @@ fn noop_insert_source() {
 #[test]
 fn delete_element() {
     new_test_ext().execute_with(|| {
+        Balances::set_balance(&1, 1000);
         // Go past genesis block so events get deposited
         System::set_block_number(1);
         assert_ok!(VaultModule::add_element(RuntimeOrigin::signed(1), 42));
@@ -149,6 +155,7 @@ fn delete_element() {
 #[test]
 fn noop_delete_element() {
     new_test_ext().execute_with(|| {
+        Balances::set_balance(&1, 1000);
         // Go past genesis block so events get deposited
         System::set_block_number(1);
         assert_noop!(

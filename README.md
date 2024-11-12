@@ -1,29 +1,23 @@
-# ScienceVault - Decentralized Scientific Data Integrity Management 😊
+# ScienceVault - Decentralized Scientific Data Integrity Management 🌐🔬
 
-## Presentation
-ScienceVault is a groundbreaking solution designed to revolutionize how scientific data integrity is managed. Built on the Substrate framework, the ScienceVault blockchain empowers users to automatically submit data and verify its integrity in a decentralized and transparent manner.
+## Overview 🚀
+ScienceVault is an innovative blockchain-based platform designed to enhance the management and verification of scientific data integrity. Built on the Substrate framework, ScienceVault enables users to submit and validate data in a decentralized, transparent manner.
 
 ## Why ScienceVault? 🤔
-Scientific data integrity is fundamental to the credibility and progress of science. Numerous high-profile cases have exposed vulnerabilities in data manipulation, leading to devastating consequences such as erroneous scientific findings and public disillusionment with scientific institutions. To restore trust in science, we believe in open and transparent data that anyone can monitor. What's essential is a method to assess data integrity as close as possible to its production, allowing subsequent users to replicate and verify the published results in scientific publications.
+Ensuring scientific data integrity is essential for the credibility and advancement of science. Recent incidents of data manipulation have revealed vulnerabilities that can lead to false findings and diminished public trust in scientific institutions. ScienceVault is dedicated to restoring confidence in science through open, monitorable data, enabling anyone to verify data integrity as close to the source as possible. This approach supports data transparency, allowing researchers to replicate and verify results published in scientific studies.
 
 ## How ScienceVault Works 🛠️
-ScienceVault employs a decentralized approach using blockchain technology to achieve these goals:
+ScienceVault leverages blockchain technology to create a decentralized and secure system for data integrity, consisting of the following key components:
 
-1. **Data Submission**: Any entity, whether a sensor, an individual, or an organization, can submit data for verification.
+1. **Data Submission** 📤: Sensors, individuals, or organizations can submit data for integrity verification.
+   
+2. **Data Hashing and Timestamping** ⏳: Submitted data is hashed and timestamped to prevent tampering or modification.
 
-2. **Data Hashing and Timestamping**: The submitted data is hashed and timestamped, ensuring that any subsequent modifications are impossible.
+3. **Blockchain Storage** 🔗: The data hash, submitter identity, and relevant metadata are securely stored on the blockchain, ensuring public accessibility and transparency.
 
-3. **Blockchain Storage**: The data hash, the submitter's identity, and any relevant information are securely stored in the blockchain, making it accessible and monitorable by anyone.
+4. **Data Accessibility** 🔍: Although the data itself is not stored on the blockchain, a link to the source may be provided with permission. Alternatively, private data access can be verified without making the data public.
 
-4. **Data Accessibility**: While the actual data is not stored on the blockchain, a link to the source can be shared with permission. Alternatively, data may remain private, but those with access can always verify its integrity.
+5. **Reputation-Based System** 🌟: ScienceVault incorporates a reputation system to discourage fraudulent activities. Reliable entities are rewarded, and bad actors are penalized, allowing users to assess data sources with confidence.
 
-5. **Reputation-Based System**: ScienceVault incorporates a reputation system to deter fraudulent activities. Trustworthy entities are rewarded, while bad actors are penalized, allowing users to assess the quality of data owners confidently. 🌟
-
-## Roadmap 🚀
-Our development roadmap for ScienceVault is as follows:
-
-- Node Implementation with Core Functionality: Expected by early 2024.
-- Client Implementation with Core Functionality: Anticipated by early 2024.
-- First Test Release: Targeted for mid-2024.
-
-ScienceVault is committed to ushering in a new era of trust and transparency in scientific data management. Join us on this journey to empower the scientific community and ensure data integrity for all. 😊🔬🌐🌈
+## Initiative 🌱
+ScienceVault is a passion project initiated by Benjamin Gallois as a proof of concept (POC), developed gradually in his spare time. Progress has been steady, despite the rapidly evolving Polkadot SDK, which presents its own challenges. Currently, there is no fixed release or completion date for ScienceVault.

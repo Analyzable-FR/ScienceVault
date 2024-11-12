@@ -78,7 +78,7 @@ impl timestamp::Config for Test {
 
 impl pallet_vault::Config for Test {
     type AccountIdOf = ();
-    type Currency = ();
+    type Currency = Balances;
     type ElementHash = u8;
     type ElementId = u64;
     type FeePrice = ConstU32<10>;
